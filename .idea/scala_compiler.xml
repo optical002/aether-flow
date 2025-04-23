@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaCompilerConfiguration">
+    <option name="separateProdTestSources" value="true" />
+    <profile name="sbt 1" modules="fp-game-engine,fp-game-engine.editor,fp-game-engine.editor.main,fp-game-engine.editor.test,fp-game-engine.engine,fp-game-engine.engine.main,fp-game-engine.engine.test,fp-game-engine.game,fp-game-engine.game.main,fp-game-engine.game.test,fp-game-engine.graphicsCore,fp-game-engine.graphicsCore.main,fp-game-engine.graphicsCore.test,fp-game-engine.graphicsCore~1,fp-game-engine.graphicsCore~1.main,fp-game-engine.graphicsCore~1.test,fp-game-engine.main,fp-game-engine.openGlGraphics,fp-game-engine.openGlGraphics.main,fp-game-engine.openGlGraphics.test,fp-game-engine.openGlGraphics~1,fp-game-engine.openGlGraphics~1.main,fp-game-engine.openGlGraphics~1.test,fp-game-engine.test" />
+  </component>
+</project>
