@@ -1,13 +1,24 @@
 package engine.graphics
 
 import engine.components.*
-import engine.ecs.WorldBuilder
+import engine.ecs.*
+import engine.core.*
 import engine.graphics.*
 import engine.graphics.config.*
 import zio.*
 
+import java.util.concurrent.Executors
+
 object Window {
-  def forkWindow = ZIO.scoped(for {
+  val singleThreadExecutor: UIO[Executor] =
+    ZIO.attempt(Executors.newSingleThreadExecutor()).map(Executor.fromJavaExecutor).orDie
+
+  def runProgram(barrier: FrameCoordinator.Barrier) = (for {
+    exec <- singleThreadExecutor
+    _ <- windowProgram(barrier).onExecutor(exec)
+  } yield ()).fork
+
+  private def windowProgram(barrier: FrameCoordinator.Barrier) = for {
     cfg <- ZIO.service[WindowConfig]
     api <- ZIO.service[GraphicsAPI]
     db <- ZIO.service[GraphicDatabase]
@@ -25,7 +36,7 @@ object Window {
           _ <- db.renderAllAssets()
           _ <- ZIO.attempt(window.swapBuffers())
           _ <- ZIO.succeed("Window Frame End").debug
-//          _ <- ZIO.sleep(16.millis)
+          _ <- barrier
           _ <- loop()
         } yield ()
       }
@@ -35,5 +46,5 @@ object Window {
     _ <- ZIO.attempt(window.close())
     _ <- db.unloadAll()
     _ <- ZIO.attempt(api.close())
-  } yield ()).fork // Have a dedicated thread for this window and do not swap.
+  } yield ()
 }

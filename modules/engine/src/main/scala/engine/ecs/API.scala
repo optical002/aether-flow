@@ -1,5 +1,6 @@
 package engine.ecs
 
+import engine.core.FrameCoordinator
 import scala.collection.*
 import zio.*
 
@@ -11,13 +12,16 @@ trait System {
 }
 
 trait WorldManager {
-  def loadWorld(worldBuilder: WorldBuilder): Task[Fiber[Throwable, Unit]]
+  def loadWorld(
+    barrier: FrameCoordinator.Barrier, worldBuilder: WorldBuilder
+  ): Task[Fiber[Throwable, Unit]]
 }
 class WorldManagerLive extends WorldManager {
   override def loadWorld(
+    barrier: FrameCoordinator.Barrier,
     worldBuilder: WorldBuilder
   ): UIO[Fiber[Throwable, Unit]] = 
-    worldBuilder.launchWorld().fork
+    worldBuilder.launchWorld(barrier).fork
 }
 object WorldManagerLive {
   val layer = ZLayer.succeed(new WorldManagerLive)
@@ -37,7 +41,7 @@ class WorldBuilder {
     this
   }
 
-  def launchWorld(): Task[Unit] = {
+  def launchWorld(barrier: FrameCoordinator.Barrier): Task[Unit] = {
     val world = new World
 
     for {
@@ -48,7 +52,7 @@ class WorldBuilder {
           _ <- ZIO.succeed("ECS Frame Start").debug
           _ <- ZIO.foreachPar(updateSystems.toList)(_.run(world))
           _ <- ZIO.succeed("ECS Frame End").debug
-          _ <- ZIO.sleep(16.millis)
+          _ <- barrier
           _ <- loop
         } yield ()
         

@@ -1,6 +1,7 @@
 package engine
 
 import engine.components.*
+import engine.core.FrameCoordinator
 import engine.ecs.*
 import engine.graphics.*
 import engine.graphics.config.*
@@ -12,14 +13,15 @@ abstract class App extends ZIOAppDefault {
   def render(db: GraphicDatabase): Task[Unit]
   def startupWorld(builder: WorldBuilder): WorldBuilder
   
-  // TODO make it so closing window stops the whole program.
   val program = for {
     graphicDB <- ZIO.service[GraphicDatabase]
-    windowFib <- Window.forkWindow
+    barrier <- FrameCoordinator.makeBarrier(2)
+    windowFib <- Window.runProgram(barrier)
     _ <- render(graphicDB)
     worldManager <- ZIO.service[WorldManager]
-    ecsWorldFib <- worldManager.loadWorld(startupWorld(new WorldBuilder))
-    _ <- windowFib.join zip ecsWorldFib.join
+    ecsWorldFib <- worldManager.loadWorld(barrier, startupWorld(new WorldBuilder))
+    _ <- windowFib.join
+    _ <- ecsWorldFib.interruptFork
   } yield ()
 
   def run = program.provide(
