@@ -11,6 +11,7 @@ object GameMain extends engine.App {
     val title = "Game from Scala FP"
     val width = 800
     val height = 600
+    val frameRate = 60
   }
 
   override def graphicsAPI(): GraphicsAPI = opengl.API

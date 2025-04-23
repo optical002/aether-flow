@@ -1,10 +1,11 @@
 package engine
 
 import engine.components.*
-import engine.core.FrameCoordinator
+import engine.core.*
 import engine.ecs.*
 import engine.graphics.*
 import engine.graphics.config.*
+import engine.resources.*
 import zio.*
 
 abstract class App extends ZIOAppDefault {
@@ -14,21 +15,30 @@ abstract class App extends ZIOAppDefault {
   def startupWorld(builder: WorldBuilder): WorldBuilder
   
   val program = for {
+    time <- ZIO.service[Time]
+    _ <- time.startCounting
     graphicDB <- ZIO.service[GraphicDatabase]
-    barrier <- FrameCoordinator.makeBarrier(2)
-    windowFib <- Window.runProgram(barrier)
     _ <- render(graphicDB)
     worldManager <- ZIO.service[WorldManager]
-    ecsWorldFib <- worldManager.loadWorld(barrier, startupWorld(new WorldBuilder))
-    _ <- windowFib.join
-    _ <- ecsWorldFib.interruptFork
+    frameRate <- ZIO.service[FrameRate]
+    frameRateFiber <- frameRate.run
+    timeFiber <- time.run
+    windowFiber <- Window.run
+    ecsWorldFiber <- worldManager.loadWorld(startupWorld(new WorldBuilder))
+    _ <- windowFiber.join
+    _ <- ecsWorldFiber.interruptFork
+    _ <- frameRateFiber.interruptFork
+    _ <- timeFiber.interruptFork
   } yield ()
 
   def run = program.provide(
     graphicsAPILayer,
     ZLayer.succeed(configs),
     GraphicDatabase.layer,
-    WorldManagerLive.layer
+    WorldManager.layer,
+    FrameCoordinator.layer,
+    Time.layer,
+    FrameRate.layer(frameRate = configs.frameRate),
   )
 
   val graphicsAPILayer = ZLayer(ZIO.attempt(graphicsAPI()))
