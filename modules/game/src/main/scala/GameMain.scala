@@ -1,3 +1,4 @@
+import engine.core.Logger
 import engine.ecs
 import engine.ecs.{Transform, Velocity, World, WorldBuilder}
 import engine.graphics.GraphicsAPI
@@ -23,14 +24,23 @@ object GameMain extends engine.App {
   override def startupWorld(
     builder: WorldBuilder
   ): WorldBuilder = builder
-    .addStartUpSystem((world: World) => ZIO.succeed {
-      world.createEntity(Transform(0, 0), Velocity(1, 1))
-    })
-    .addSystem((world: World) => ZIO.succeed {
+    .addStartUpSystem(StartUpSystem)
+    .addSystem(MovementSystem)
+}
+
+object StartUpSystem extends ecs.System {
+  override def run(world: World, logger: Logger): Task[Unit] = ZIO.succeed {
+    world.createEntity(Transform(0, 0), Velocity(1, 1))
+  } *> logger.logInfo("Created entity")
+}
+object MovementSystem extends ecs.System {
+  override def run(world: World, logger: Logger): Task[Unit] = for {
+    _ <- ZIO.succeed{
       val result = world.query2[Transform, Velocity]
       for ((id, t, v) <- result) {
         val moved = t.copy(x = t.x + v.dx, y = t.y + v.dy)
-        println(s"Entity $id moved to (${moved.x}, ${moved.y})")
       }
-    })
+    }
+    _ <- logger.logInfo("Moved entity")
+  }yield ()
 }

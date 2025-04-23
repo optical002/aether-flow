@@ -1,6 +1,6 @@
 package engine.resources
 
-import engine.core.FrameCoordinator
+import engine.core.{FrameCoordinator, Logger}
 import engine.core.FrameCoordinator.SignalFrom
 import zio.*
 
@@ -10,6 +10,8 @@ class Time(
   clock: Clock,
   frameCoordinator: FrameCoordinator,
 ) {
+  private val logger = new Logger("Time")
+  
   def startCounting = for {
     startedAtNs <- clock.nanoTime
     _ <- startedAtNsRef.update(_ => startedAtNs)
@@ -24,8 +26,10 @@ class Time(
 
   def run = {
     def loop(): UIO[Unit] = for {
+      _ <- logger.logVerbose("Updating frame count by 1")
       // At the end of the frame update, since we start from -1 frame, first frame it will be 0
       _ <- framesPassedRef.update(_ + 1)
+      _ <- logger.logVerbose("Waiting for next frame")
       _ <- frameCoordinator.signalReady(SignalFrom.Time)
       _ <- loop()
     } yield ()

@@ -8,6 +8,8 @@ val zioVersion = "2.1.17"
 lazy val commonDependencies = Seq(
   // Effect
   "dev.zio" %% "zio" % zioVersion,
+  "dev.zio" %% "zio-logging" % "2.5.0",
+  "dev.zio" %% "zio-config-typesafe" % "4.0.0",
 
   // Newtype
   "io.github.arturaz" %% "yantl" % "0.2.4",
