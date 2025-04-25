@@ -1,7 +1,6 @@
 package engine.os
 
 import engine.core.Logger
-import engine.os.executors.ShellExecutor
 import zio.*
 
 trait ShellRunnableScript[Script] {

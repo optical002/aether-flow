@@ -1,6 +1,7 @@
 package engine.os.executors
 
 import engine.core.Logger
+import engine.os.ShellExecutor
 import engine.os.powershell.PowershellScript
 import zio.stream.*
 import zio.*
@@ -27,7 +28,7 @@ object PowershellExecutor extends ShellExecutor[PowershellScript] {
     val command: Seq[String] = Seq(
       "powershell",
       "-Command",
-      s"""Start-Process powershell.exe -ArgumentList '-File "${wrappedScriptPath.toAbsolutePath}"' -Verb RunAs"""
+      s"""Start-Process powershell.exe -ArgumentList '-File "${wrappedScriptPath.toAbsolutePath}"' -WindowStyle Hidden""" // Note add ' -Verb RunAs' to run as admin
     )
 
     val processBuilder = new ProcessBuilder(command.asJava)
@@ -35,31 +36,31 @@ object PowershellExecutor extends ShellExecutor[PowershellScript] {
     processBuilder.start()
   }
 
-  def readNewLines(startAt: Int, filePath: Path): Task[(List[String], Int)] = ZIO.attempt {
-    val lines = Files.readAllLines(filePath, StandardCharsets.UTF_8).asScala.toList
-    val newLines = lines.drop(startAt)
-    (newLines, lines.length)
-  }
+  def readNewLines(startAt: Int, filePath: Path, logger: Logger): Task[(List[String], Int)] = for {
+    lines <- ZIO.attempt(Files.readAllLines(filePath, StandardCharsets.UTF_8).asScala.toList.map(_.stripPrefix("\uFEFF")))
+    newLines = lines.drop(startAt)
+    _ <- logger.logVerbose(s"Read additional content: $newLines")
+  } yield (newLines, lines.length)
 
   case class FileState(lastIndex: Int, buffer: List[String])
 
-  def streamFile(filePath: Path, logger: Logger) = ZStream.unfoldZIO(FileState(0, Nil)) {
-    case FileState(idx, Nil) => for {
-      _ <- logger.logVerbose(s"Attempting to read from a temporary output file")
-      result <- readNewLines(idx, filePath).map { case (lines, newIdx) =>
-        lines match {
-          case Nil            => None
-          case ::(head, next) => Some((head, FileState(newIdx, next)))
+  def streamFile(
+    filePath: Path, logger: Logger
+  ): ZStream[Any, Throwable, String] = ZStream.unfoldZIO(FileState(0, Nil)) {
+      case FileState(idx, Nil) => for {
+        (lines, newIdx) <- readNewLines(idx, filePath, logger)
+        result <- lines match {
+          case Nil => ZIO.succeed(None)
+          case ::(head, tail)   => ZIO.succeed(Some(head, FileState(newIdx, tail)))
         }
-      }
-    } yield result
+      } yield result
 
 
-    case FileState(idx, ::(head, tail)) => for {
-      result <- ZIO.succeed(Some(head, FileState(idx, tail)))
-      _ <- logger.logVerbose(s"Ingesting by line: '$result'")
-    } yield result
-  }.repeat(Schedule.spaced(500.millis))
+      case FileState(idx, ::(head, tail)) => for {
+        result <- ZIO.succeed(Some(head, FileState(idx, tail)))
+        _ <- logger.logVerbose(s"Ingesting by line: '$result'")
+      } yield result
+    }.repeat(Schedule.spaced(500.millis))
 
   def program(
     script: String, logger: Logger
