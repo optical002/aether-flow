@@ -1,6 +1,5 @@
 package engine
 
-import engine.components.*
 import engine.core.*
 import engine.ecs.*
 import engine.graphics.*

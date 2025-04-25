@@ -35,7 +35,7 @@ object StartUpSystem extends ecs.System {
 }
 object MovementSystem extends ecs.System {
   override def run(world: World, logger: Logger): Task[Unit] = for {
-    _ <- ZIO.succeed{
+    _ <- ZIO.succeed {
       val result = world.query2[Transform, Velocity]
       for ((id, t, v) <- result) {
         val moved = t.copy(x = t.x + v.dx, y = t.y + v.dy)

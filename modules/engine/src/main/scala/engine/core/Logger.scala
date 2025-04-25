@@ -21,6 +21,9 @@ class Logger(scope: String) {
   def logInfo(msg: String): UIO[Unit] = logLevel(msg, LogLevel.Info)
   def logError(msg: String): UIO[Unit] = logLevel(msg, LogLevel.Error)
   def logFatal(msg: String): UIO[Unit] = logLevel(msg, LogLevel.Fatal)
+  def logWarning(msg: String): UIO[Unit] = logLevel(msg, LogLevel.Warning)
+
+  def scope(innerScope: String): Logger = new Logger(s"$scope.$innerScope")
 }
 object Logger {
   val logger: ZLogger[String, Unit] = (

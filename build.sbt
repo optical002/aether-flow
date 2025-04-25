@@ -9,13 +9,16 @@ lazy val commonDependencies = Seq(
   // Effect
   "dev.zio" %% "zio" % zioVersion,
   "dev.zio" %% "zio-logging" % "2.5.0",
-  "dev.zio" %% "zio-config-typesafe" % "4.0.0",
+  "dev.zio" %% "zio-config-typesafe" % "4.0.4",
 
   // Newtype
   "io.github.arturaz" %% "yantl" % "0.2.4",
 
   // Vector math library
   "org.joml" % "joml" % "1.10.8",
+
+  // OS
+  "com.lihaoyi" %% "os-lib" % "0.11.4",
 )
 
 lazy val graphicsCore = (project in file("modules/engine/graphics/core"))
