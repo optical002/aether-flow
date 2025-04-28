@@ -6,10 +6,11 @@ val imguiVersion = "1.89.0"
 val zioVersion = "2.1.17"
 
 lazy val commonDependencies = Seq(
-  // Effect
+  // ZIO
   "dev.zio" %% "zio" % zioVersion,
   "dev.zio" %% "zio-logging" % "2.5.0",
   "dev.zio" %% "zio-config-typesafe" % "4.0.4",
+  "dev.zio" %% "zio-metrics-connectors" % "2.3.1",
 
   // Newtype
   "io.github.arturaz" %% "yantl" % "0.2.4",
@@ -19,6 +20,9 @@ lazy val commonDependencies = Seq(
 
   // OS
   "com.lihaoyi" %% "os-lib" % "0.11.4",
+
+  // Scalafx
+  "org.scalafx" %% "scalafx" % "24.0.0-R35"
 )
 
 lazy val graphicsCore = (project in file("modules/engine/graphics/core"))
