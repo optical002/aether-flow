@@ -46,7 +46,7 @@ class WorldBuilder {
         _ <- Performance.timeframe(frameDuration("ECS"),
           ZIO.foreachPar(updateSystems.toList) { s =>
             Performance.timeframe(ecsMetric(s.systemName),
-              s.run(world, new ZIOLogger(s.getClass.getName))
+              s.run(world, new ZIOLogger(s.systemName))
             )
           }
         )

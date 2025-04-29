@@ -58,7 +58,7 @@ class PerformanceMonitorWindow(
           val tooltip = new Tooltip(
             s"""
                |${chartLineName.a}
-               |Ms took: ${dataPoint.YValue.get()} ms
+               |Ns took: ${dataPoint.YValue.get()} ns
                |At second: ${dataPoint.XValue.get()} s
                |""".stripMargin
           )
@@ -132,21 +132,23 @@ class PerformanceMonitorWindow(
       val chartData = buffers
         .filter(now => latestMillis - now.timestamp < 10_000)
         .groupBy(_.entry.header.title)
-        .map { (title, entries) =>
-          val lineData = entries
-            .groupBy(_.entry.header.name)
-            .map { (name, entries) =>
-              ChartLineData(ChartLineName(name), entries.map(e => (
-                e.entry.value, (e.timestamp / 1000.0) - (latestSecond - 10.0)
-              )))
-            }
-          val maxEntry = entries.filter(_.timestamp >= latestMillis).maxBy(_.entry.value).entry
-          ChartData(
-            ChartTitle { prop =>
-              prop.value = s"$title: ${maxEntry.valueAsUnitStr}"
-            },
-            lineData
-          )
+        .flatMap { (title, entries) =>
+          if (entries.isEmpty) None else {
+            val lineData = entries
+              .groupBy(_.entry.header.name)
+              .map { (name, entries) =>
+                ChartLineData(ChartLineName(name), entries.map(e => (
+                  e.entry.value, (e.timestamp / 1000.0) - (latestSecond - 10.0)
+                )))
+              }
+            val maxEntry = entries.filter(_.timestamp >= latestMillis).maxBy(_.entry.value).entry
+            Some(ChartData(
+              ChartTitle { prop =>
+                prop.value = s"$title: ${maxEntry.valueAsUnitStr}"
+              },
+              lineData
+            ))
+          }
         }
       val lineCharts = chartData.map(dataToLineCharts)
 

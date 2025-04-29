@@ -25,7 +25,7 @@ object Test extends ZIOAppDefault {
   } yield ()
 
   def run = program.provide(
-    ZIOLogger.layer,
+    ZIOLogger.allowAllLayer,
     Scope.default,
   )
 }

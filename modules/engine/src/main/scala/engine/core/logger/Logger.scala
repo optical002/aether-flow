@@ -2,8 +2,9 @@ package engine.core.logger
 
 import engine.core.ConsoleColor
 import engine.core.ConsoleColor.*
-import zio.{FiberId, LogLevel}
+import zio.*
 
+import java.io.{OutputStream, PrintStream}
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 

@@ -31,7 +31,7 @@ object GameMain extends engine.App {
 object StartUpSystem extends ecs.System {
   override def run(world: World, logger: ZIOLogger): Task[Unit] = ZIO.succeed {
     world.createEntity(Transform(0, 0), Velocity(1, 1))
-  } *> logger.logInfo("Created entity")
+  } *> logger.logDebug("Created entity")
 }
 object MovementSystem extends ecs.System {
   override def run(world: World, logger: ZIOLogger): Task[Unit] = for {
@@ -41,6 +41,6 @@ object MovementSystem extends ecs.System {
         val moved = t.copy(x = t.x + v.dx, y = t.y + v.dy)
       }
     }
-    _ <- logger.logInfo("Moved entity")
+    _ <- logger.logDebug("Moved entity")
   }yield ()
 }

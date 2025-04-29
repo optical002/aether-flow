@@ -3,6 +3,7 @@ package engine.core.logger
 import engine.core.ConsoleColor
 import zio.*
 
+import java.io.PrintStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -21,15 +22,20 @@ class ZIOLogger(val scope: String) extends Logger[UIO[Unit], ZIOLogger] {
   override def make(scope: String): ZIOLogger = new ZIOLogger(scope)
   
   // Should get only invoked right before synchronous code to get the right fiber id.
-  def toSyncLogger: UIO[SingleFiberConsoleLogger] = 
-    ZIO.fiberId.map(fiberId => new SingleFiberConsoleLogger(scope, fiberId))
+  def toSyncLogger: URIO[LogFilter, SingleFiberConsoleLogger] = for {
+    fiberId <- ZIO.fiberId
+    logFilter <- ZIO.service[LogFilter]
+  } yield new SingleFiberConsoleLogger(scope, fiberId, logFilter)
 }
 object ZIOLogger {
   object AnnotationKeys {
     val scope = "scope"
   }
 
-  val logger: ZLogger[String, Unit] = (
+  // TODO redirect logs to here.
+  def logger(
+    logFilter: LogFilter
+  ): ZLogger[String, Unit] = (
     trace: Trace, fiberId: FiberId, logLevel: LogLevel, message: () => String, cause: Cause[Any],
     context: FiberRefs, spans: List[LogSpan], annotations: Map[String, String]
   ) => {
@@ -38,10 +44,17 @@ object ZIOLogger {
       case None        => ""
     }
 
-    println(
-     Logger.formatMessage(message(), logLevel = logLevel, fiberId = fiberId, scopeRaw = scope)
-    )
+    if (logFilter.shouldPrint(scope, logLevel)) {
+      println(
+        Logger.formatMessage(message(), logLevel = logLevel, fiberId = fiberId, scopeRaw = scope)
+      )
+    }
   }
 
-  val layer = Runtime.removeDefaultLoggers >>> Runtime.addLogger(logger)
+  val allowAllLayer = ZLayer.succeed(LogFilter.allowAll) >>> layer
+  val layer = for {
+    logFilter <- ZLayer.service[LogFilter]
+    _ <- Runtime.removeDefaultLoggers
+    any <- Runtime.addLogger(logger(logFilter.get))
+  } yield any
 }

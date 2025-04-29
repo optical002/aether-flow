@@ -1,7 +1,7 @@
 package engine
 
 import engine.core.*
-import engine.core.logger.ZIOLogger
+import engine.core.logger.{LogFilter, Logger, ZIOLogger}
 import engine.ecs.*
 import engine.graphics.*
 import engine.graphics.config.*
@@ -66,6 +66,12 @@ abstract class App extends ZIOAppDefault {
     FrameCoordinator.layer,
     Time.layer,
     FrameLimiter.layer(frameRate = configs.frameRate),
+    ZLayer.succeed(new LogFilter(
+      allowedLogLevel = LogLevel.All,
+      customScopeRules = Map(
+        "MovementSystem" -> LogLevel.Info,
+      )
+    )), // TODO to conf
     ZIOLogger.layer,
     PerformanceMonitorWindow.layer(metricSendIntervalMillis = 500), // TODO to conf
   )
