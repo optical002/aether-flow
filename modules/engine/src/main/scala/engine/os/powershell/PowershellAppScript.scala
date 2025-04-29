@@ -1,6 +1,6 @@
 package engine.os.powershell
 
-import engine.core.Logger
+import engine.core.logger.ZIOLogger
 import engine.os.*
 import engine.os.executors.*
 import zio.*
@@ -12,7 +12,7 @@ trait PowershellAppScript extends ShellRunnableScript[PowershellScript] {
   
   override protected def executor: ShellExecutor[PowershellScript] = PowershellExecutor
 
-  def runScript(logger: Logger): UIO[Either[Throwable, Unit]] = (for {
+  def runScript(logger: ZIOLogger): UIO[Either[Throwable, Unit]] = (for {
     _ <- logger.logVerbose("Starting to execute powershell script")
     fiber <- executor.process(script, logger)
     _ <- logger.logVerbose("Waiting for powershell script to finish executing")

@@ -1,17 +1,17 @@
 package engine.graphics
 
-import engine.components.*
-import engine.ecs.*
 import engine.core.*
 import engine.core.FrameCoordinator.SignalFrom.Render
-import engine.graphics.*
+import engine.core.logger.ZIOLogger
 import engine.graphics.config.*
+import engine.performance.Performance
+import engine.performance.PerformanceMetrics.*
 import zio.*
 
 import java.util.concurrent.Executors
 
 object Window {
-  private val logger = new Logger("Window")
+  private val logger = new ZIOLogger("Window")
 
   val singleThreadExecutor: UIO[Executor] =
     ZIO.attempt(Executors.newSingleThreadExecutor()).map(Executor.fromJavaExecutor).orDie
@@ -27,6 +27,8 @@ object Window {
     cfg <- ZIO.service[WindowConfig]
     api <- ZIO.service[GraphicsAPI]
     db <- ZIO.service[GraphicDatabase]
+    clock <- ZIO.clock
+    start <- clock.nanoTime
     frameCoordinator <- ZIO.service[FrameCoordinator]
     _ <- logger.logVerbose("Initializing graphics api")
     _ <- ZIO.attempt(api.init())
@@ -34,23 +36,26 @@ object Window {
     window <- ZIO.attempt(api.createWindow(cfg))
     _ <- logger.logVerbose("Creating input system")
     inputSystem <- ZIO.attempt(api.createInputSystem())
-    clock <- ZIO.clock
+    end <- clock.nanoTime
+    _ <- ZIO.succeed[Double](end - start) @@ Performance.labelNs(windowStartup)
     _ <- {
       def loop(): Task[Unit] = {
         if (!window.isActive) logger.logVerbose("Window became inactive")
         else for {
           _ <- logger.logVerbose("Waiting for next frame")
           _ <- frameCoordinator.signalReady(Render)
-          _ <- logger.logVerbose("Initializing queued up assets")
-          _ <- db.initializeQueuedUpAssets()
-          _ <- logger.logVerbose("Polling events")
-          _ <- ZIO.attempt(inputSystem.pollEvents())
-          _ <- logger.logVerbose("Clearing screen")
-          _ <- ZIO.attempt(window.clearScreen())
-          _ <- logger.logVerbose("Rendering all assets")
-          _ <- db.renderAllAssets()
-          _ <- logger.logVerbose("Swapping buffers")
-          _ <- ZIO.attempt(window.swapBuffers())
+          _ <- Performance.timeframe(frameDuration("Render"), for {
+            _ <- logger.logVerbose("Initializing queued up assets")
+            _ <- db.initializeQueuedUpAssets()
+            _ <- logger.logVerbose("Polling events")
+            _ <- ZIO.attempt(inputSystem.pollEvents())
+            _ <- logger.logVerbose("Clearing screen")
+            _ <- ZIO.attempt(window.clearScreen())
+            _ <- logger.logVerbose("Rendering all assets")
+            _ <- db.renderAllAssets()
+            _ <- logger.logVerbose("Swapping buffers")
+            _ <- ZIO.attempt(window.swapBuffers())
+          } yield ())
           _ <- loop()
         } yield ()
       }

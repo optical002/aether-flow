@@ -1,6 +1,6 @@
 package engine.os.powershell.pipelines
 
-import engine.core.Logger
+import engine.core.logger.ZIOLogger
 import engine.os.docker_compose.*
 import engine.os.powershell.DockerComposePipeline
 import zio.*
@@ -15,7 +15,7 @@ object GraphiteStatsDGrafana extends DockerComposePipeline(
 )
 
 object Test extends ZIOAppDefault {
-  val logger = new Logger("Test")
+  val logger = new ZIOLogger("Test")
 
   val program = for {
     _ <- GraphiteStatsDGrafana.run(logger)
@@ -25,7 +25,7 @@ object Test extends ZIOAppDefault {
   } yield ()
 
   def run = program.provide(
-    Logger.layer,
+    ZIOLogger.layer,
     Scope.default,
   )
 }

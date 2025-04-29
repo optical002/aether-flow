@@ -1,6 +1,6 @@
 package engine.os.executors
 
-import engine.core.Logger
+import engine.core.logger.ZIOLogger
 import engine.os.ShellExecutor
 import engine.os.powershell.PowershellScript
 import zio.stream.*
@@ -36,7 +36,7 @@ object PowershellExecutor extends ShellExecutor[PowershellScript] {
     processBuilder.start()
   }
 
-  def readNewLines(startAt: Int, filePath: Path, logger: Logger): Task[(List[String], Int)] = for {
+  def readNewLines(startAt: Int, filePath: Path, logger: ZIOLogger): Task[(List[String], Int)] = for {
     lines <- ZIO.attempt(Files.readAllLines(filePath, StandardCharsets.UTF_8).asScala.toList.map(_.stripPrefix("\uFEFF")))
     newLines = lines.drop(startAt)
     _ <- logger.logVerbose(s"Read additional content: $newLines")
@@ -45,7 +45,7 @@ object PowershellExecutor extends ShellExecutor[PowershellScript] {
   case class FileState(lastIndex: Int, buffer: List[String])
 
   def streamFile(
-    filePath: Path, logger: Logger
+    filePath: Path, logger: ZIOLogger
   ): ZStream[Any, Throwable, String] = ZStream.unfoldZIO(FileState(0, Nil)) {
       case FileState(idx, Nil) => for {
         (lines, newIdx) <- readNewLines(idx, filePath, logger)
@@ -63,7 +63,7 @@ object PowershellExecutor extends ShellExecutor[PowershellScript] {
     }.repeat(Schedule.spaced(500.millis))
 
   def program(
-    script: String, logger: Logger
+    script: String, logger: ZIOLogger
   ): Task[Seq[String]] = for {
     _ <- logger.logVerbose("Creating temporary file for storing output")
     outputFilePath <- ZIO.attempt(Files.createTempFile("powershell-output", ".txt"))
@@ -76,7 +76,7 @@ object PowershellExecutor extends ShellExecutor[PowershellScript] {
   } yield output
 
   override def process(
-    script: PowershellScript, logger: Logger
+    script: PowershellScript, logger: ZIOLogger
   ): UIO[Fiber[Throwable, Seq[String]]] =
     program(script.get, logger.scope("Powershell-Executor"))
       .map(_.filter(str => str.nonEmpty && str != eofSymbol))

@@ -1,9 +1,11 @@
 package engine
 
 import engine.core.*
+import engine.core.logger.ZIOLogger
 import engine.ecs.*
 import engine.graphics.*
 import engine.graphics.config.*
+import engine.performance.{PerformanceMetricClient, PerformanceMonitorWindow}
 import engine.resources.*
 import zio.*
 
@@ -13,19 +15,24 @@ abstract class App extends ZIOAppDefault {
   def render(db: GraphicDatabase): Task[Unit]
   def startupWorld(builder: WorldBuilder): WorldBuilder
 
-  private val logger = new Logger("App")
+  private val logger = new ZIOLogger("App")
   
   val program = for {
     _ <- logger.logVerbose("Starting application")
     time <- ZIO.service[Time]
     _ <- logger.logVerbose("Starting counting time")
     _ <- time.startCounting
+    _ <- PerformanceMetricClient.run
     graphicDB <- ZIO.service[GraphicDatabase]
     _ <- render(graphicDB)
+    
     worldManager <- ZIO.service[WorldManager]
-    frameRate <- ZIO.service[FrameLimiter]
+    frameLimiter <- ZIO.service[FrameLimiter]
+    
+    _ <- logger.logVerbose("Starting 'Performance Monitor'")
+    performanceMonitorFiber <- PerformanceMonitorWindow.forkNewWindowApp // TODO enable/disable via conf
     _ <- logger.logVerbose("Starting 'FrameRate'")
-    frameRateFiber <- frameRate.run
+    frameLimiterFiber <- frameLimiter.run
     _ <- logger.logVerbose("Starting 'Time'")
     timeFiber <- time.run
     _ <- logger.logVerbose("Starting 'Window'")
@@ -33,12 +40,19 @@ abstract class App extends ZIOAppDefault {
     _ <- logger.logVerbose("Starting 'ECS-World'")
     ecsWorldFiber <- worldManager.loadWorld(startupWorld(new WorldBuilder))
     _ <- windowFiber.join
+    
     _ <- logger.logVerbose("Killing application on window close")
-    _ <- ecsWorldFiber.interruptFork
-    _ <- frameRateFiber.interruptFork
-    _ <- timeFiber.interruptFork
+    _ <- close(List(
+      ecsWorldFiber,
+      frameLimiterFiber,
+      timeFiber,
+      performanceMonitorFiber
+    ))
     _ <- logger.logVerbose("Application killed successfully")
   } yield ()
+
+  def close(fibers: List[Fiber[?, ?]]): UIO[Unit] =
+    ZIO.foreachPar(fibers)(_.interruptFork).unit
 
   val loggedProgram = program.catchAll { err =>
     logger.logFatal(s"Unhandled exception: ${err.getMessage}")
@@ -52,7 +66,8 @@ abstract class App extends ZIOAppDefault {
     FrameCoordinator.layer,
     Time.layer,
     FrameLimiter.layer(frameRate = configs.frameRate),
-    Logger.layer
+    ZIOLogger.layer,
+    PerformanceMonitorWindow.layer(metricSendIntervalMillis = 500), // TODO to conf
   )
 
   val graphicsAPILayer = ZLayer(ZIO.attempt(graphicsAPI()))

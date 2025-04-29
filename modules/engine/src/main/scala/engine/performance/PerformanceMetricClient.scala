@@ -4,28 +4,39 @@ import zio.ZIO
 import zio.metrics.{MetricKey, MetricState}
 import zio.metrics.connectors.MetricEvent
 import zio.metrics.connectors.internal.MetricsClient
+import engine.core.*
+import engine.core.logger.ZIOLogger
 
 import java.time.Instant
 
 object PerformanceMetricClient {
   import PerformanceDataAggregator.*
+  val logger = new ZIOLogger("Performance.MetricClient")
 
   val run = for {
     aggregator <- ZIO.service[PerformanceDataAggregator]
     startedAt <- ZIO.succeed(Instant.now().toEpochMilli)
+    _ <- logger.logVerbose(s"Starting client")
     _ <- MetricsClient.make { iter =>
       for {
         collected <- ZIO.collectPar(iter) {
           case MetricEvent.New(metricKey, current, timestamp) =>
-            ZIO.succeed(s"${timestamp.toEpochMilli}").debug
-              *> ZIO.succeed(processInstance(metricKey, current, timestamp.toEpochMilli - startedAt))
+            ZIO.succeed(processInstance(metricKey, current, timestamp.toEpochMilli - startedAt))
           case MetricEvent.Unchanged(metricKey, current, timestamp) =>
-            ZIO.succeed(s"${timestamp.toEpochMilli}").debug
-              *> ZIO.succeed(processInstance(metricKey, current, timestamp.toEpochMilli - startedAt))
+            ZIO.succeed(processInstance(metricKey, current, timestamp.toEpochMilli - startedAt))
           case MetricEvent.Updated(metricKey, _, current, timestamp) =>
-            ZIO.succeed(s"${timestamp.toEpochMilli}").debug
-              *> ZIO.succeed(processInstance(metricKey, current, timestamp.toEpochMilli - startedAt))
+            ZIO.succeed(processInstance(metricKey, current, timestamp.toEpochMilli - startedAt))
         }
+        _ <- logger.logVerbose(
+          s"Collected ${collected.flatten.size} metrics. Sending to aggregator: " +
+          s"${collected.flatten.map {
+              case BufferEntry(timestamp, entry) =>
+                s"BufferEntry(timestamp = $timestamp, value = ${entry.value}, metricName = ${entry.header.asMetricName})"
+              case entry: ConstantEntry  =>
+                s"ConstantEntry(value = ${entry.value}, metricName = ${entry.header.asMetricName})"
+            }.mkString(start = "[\n  ", sep = "\n  ", end = "\n]")
+          }"
+        )
         _ <- ZIO.succeed(aggregator.aggregate(collected.flatten))
       } yield ()
     }
@@ -38,10 +49,13 @@ object PerformanceMetricClient {
     path <- fromMetricName(metricKey.name)
     state <- processState(metricState)
   } yield {
-    val constant = ConstantEntry(state.doubleValue, path.header)
+    val constantUnit = UnitConstantEntry(state.doubleValue, path.header)
+    val constantNs = NsConstantEntry(state.doubleValue, path.header)
     path.kind match {
-      case Kind.Constant => constant
-      case Kind.Buffer   => BufferEntry(timestamp, constant)
+      case Kind.ConstantUnit => constantUnit
+      case Kind.ConstantNs => constantNs
+      case Kind.BufferUnit   => BufferEntry(timestamp, constantUnit)
+      case Kind.BufferNs   => BufferEntry(timestamp, constantNs)
     }
   }
 
