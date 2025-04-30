@@ -1,5 +1,13 @@
 package engine.performance
 
+import scalafx.Includes.*
+import scalafx.application.JFXApp3
+import scalafx.geometry.{Insets, Pos}
+import scalafx.scene.Scene
+import scalafx.scene.control.Button
+import scalafx.scene.input.MouseEvent
+import scalafx.scene.layout.{HBox, Pane, StackPane, VBox}
+import scalafx.stage.{Stage, StageStyle}
 import engine.core.logger.{SingleFiberConsoleLogger, ZIOLogger}
 import engine.utils.*
 import scalafx.Includes.*
@@ -9,8 +17,9 @@ import scalafx.event.subscriptions.Subscription
 import scalafx.scene.Scene
 import scalafx.scene.chart.{LineChart, NumberAxis, XYChart}
 import scalafx.scene.control.{Label, Tooltip}
-import scalafx.scene.layout.VBox
+import scalafx.scene.paint.Color
 import scalafx.scene.text.*
+import scalafx.stage.StageStyle.{Undecorated, Utility}
 import zio.*
 import zio.metrics.*
 import zio.metrics.connectors.*
@@ -22,6 +31,8 @@ class PerformanceMonitorWindow(
   logger: SingleFiberConsoleLogger,
   killSwitch: () => Unit,
 ) extends JFXApp3 {
+  val metricLogger = logger.scope("Metrics")
+
   val chartMemo = Memo.create[
     ChartTitle, LineChart[Number, Number]
   ] { title =>
@@ -35,6 +46,7 @@ class PerformanceMonitorWindow(
 
     title.setTitle(lineChart.title)
     lineChart.animated = false
+    lineChart.createSymbols = false
     xAxis.label = "Last 10 seconds"
     yAxis.label = "Elapsed in ns"
 
@@ -94,12 +106,12 @@ class PerformanceMonitorWindow(
   }
 
 
-  def bindToWindowState(scene: Scene) = {
+  def bindToWindowState(contentBox: VBox) = {
     import engine.performance.PerformanceDataAggregator.*
 
     aggregator.windowState.onChange { (_, _, entries) => Platform.runLater {
       killSwitch()
-      logger.logVerbose(
+      metricLogger.logVerbose(
         s"Aggregated ${entries.size} metrics from aggregator: " +
           s"${entries.map {
             case BufferEntry(timestamp, entry) =>
@@ -133,7 +145,8 @@ class PerformanceMonitorWindow(
         .filter(now => latestMillis - now.timestamp < 10_000)
         .groupBy(_.entry.header.title)
         .flatMap { (title, entries) =>
-          if (entries.isEmpty) None else {
+          val filtered = entries.filter(_.timestamp >= latestMillis)
+          if (filtered.isEmpty) None else {
             val lineData = entries
               .groupBy(_.entry.header.name)
               .map { (name, entries) =>
@@ -141,7 +154,7 @@ class PerformanceMonitorWindow(
                   e.entry.value, (e.timestamp / 1000.0) - (latestSecond - 10.0)
                 )))
               }
-            val maxEntry = entries.filter(_.timestamp >= latestMillis).maxBy(_.entry.value).entry
+            val maxEntry = filtered.maxBy(_.entry.value).entry
             Some(ChartData(
               ChartTitle { prop =>
                 prop.value = s"$title: ${maxEntry.valueAsUnitStr}"
@@ -152,28 +165,72 @@ class PerformanceMonitorWindow(
         }
       val lineCharts = chartData.map(dataToLineCharts)
 
-      scene.root = new VBox {
-        spacing = 10
-        children = labels ++ lineCharts
-      }
+      contentBox.children = labels ++ lineCharts
     }}
   }
 
+  lazy val titleBar = {
+    var dragDeltaX = 0.0
+    var dragDeltaY = 0.0
+
+    val closeButton = new Button("X") {
+      onMousePressed = _ => stage.close()
+      style =
+        """
+          | -fx-background-color: linear-gradient(#3a3a3a, #1f1f1f);
+          | -fx-text-fill: white;
+          | -fx-font-weight: bold;
+          | -fx-border-color: #5e5e5e;
+          | -fx-border-width: 1;
+          | -fx-border-radius: 3;
+          | -fx-background-radius: 3;
+          | -fx-padding: 5 10 5 10;
+          """.stripMargin
+
+      onMouseEntered = _ => style.value = style.value + "\n -fx-background-color: linear-gradient(#505050, #2a2a2a);"
+      onMouseExited  = _ => style.value = style.value + "\n -fx-background-color: linear-gradient(#3a3a3a, #1f1f1f);"
+    }
+
+    new HBox {
+      padding = Insets(0, 5, 5, 5) // top, right, bottom, left — top = 0
+      spacing = 10
+      alignment = Pos.CenterRight
+      style = "-fx-background-color: #444"
+      children = Seq(closeButton)
+      // Set mouse pressed and dragged events directly
+      this.onMousePressed = (event: MouseEvent) => {
+        dragDeltaX = event.screenX - stage.x.value
+        dragDeltaY = event.screenY - stage.y.value
+      }
+
+      this.onMouseDragged = (event: MouseEvent) => {
+        stage.x = event.screenX - dragDeltaX
+        stage.y = event.screenY - dragDeltaY
+      }
+    }
+  }
 
   def start() = {
+    val contentBox = new VBox {
+//      style = "-fx-background-color: #2f2f2f;"  // Dark grey background color
+      children = Seq(new Label("Starting..."))
+    }
     stage = new JFXApp3.PrimaryStage {
       title = "Performance Monitor"
       width = 1080
       height = 1080
-      scene = {
-        val scene = new Scene {
-          content = new Label("Starting...")
+      initStyle(Undecorated)
+      scene = new Scene {
+        fill = Color.Black
+        root = new VBox {
+          children = Seq(
+            titleBar,
+            contentBox
+          )
         }
-        logger.logVerbose("Binding to window state")
-        bindToWindowState(scene)
-        scene
       }
     }
+    bindToWindowState(contentBox)
   }
 }
 object PerformanceMonitorWindow {
@@ -188,12 +245,14 @@ object PerformanceMonitorWindow {
     // A simulated fiber which acts as app killer.
     killFiber <- ZIO.never.onInterrupt {
       ZIO.attempt {
+        // TODO test this as closing mechanism
+        //        window.stage.close()
         shouldKill = true
       }.orDie *> logger.logVerbose("Closing window")
     }.fork
     _ <- (for {
       syncLogger <- logger.toSyncLogger
-      _ <- ZIO.attempt {
+      maybeError <- ZIO.attempt {
         val window = new PerformanceMonitorWindow(aggregator, syncLogger, killSwitch = () => {
           if (shouldKill) {
             Platform.runLater(Platform.exit())
@@ -201,6 +260,11 @@ object PerformanceMonitorWindow {
         })
         syncLogger.logVerbose("Starting window")
         window.main(Array.empty)
+        syncLogger.logVerbose("Window finished")
+      }.either
+      _ <- maybeError match {
+        case Right(_) => ZIO.unit
+        case Left(err)  => logger.logError(err)
       }
     } yield ()).fork
   } yield killFiber

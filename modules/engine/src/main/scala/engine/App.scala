@@ -5,7 +5,7 @@ import engine.core.logger.{LogFilter, Logger, ZIOLogger}
 import engine.ecs.*
 import engine.graphics.*
 import engine.graphics.config.*
-import engine.performance.{PerformanceMetricClient, PerformanceMonitorWindow}
+import engine.performance.*
 import engine.resources.*
 import zio.*
 
@@ -23,12 +23,14 @@ abstract class App extends ZIOAppDefault {
     _ <- logger.logVerbose("Starting counting time")
     _ <- time.startCounting
     _ <- PerformanceMetricClient.run
+
     graphicDB <- ZIO.service[GraphicDatabase]
     _ <- render(graphicDB)
     
     worldManager <- ZIO.service[WorldManager]
     frameLimiter <- ZIO.service[FrameLimiter]
-    
+
+    frameDurationFiber <- FrameDurationPerformance.run
     _ <- logger.logVerbose("Starting 'Performance Monitor'")
     performanceMonitorFiber <- PerformanceMonitorWindow.forkNewWindowApp // TODO enable/disable via conf
     _ <- logger.logVerbose("Starting 'FrameRate'")
@@ -43,6 +45,7 @@ abstract class App extends ZIOAppDefault {
     
     _ <- logger.logVerbose("Killing application on window close")
     _ <- close(List(
+      frameDurationFiber,
       ecsWorldFiber,
       frameLimiterFiber,
       timeFiber,
@@ -67,13 +70,15 @@ abstract class App extends ZIOAppDefault {
     Time.layer,
     FrameLimiter.layer(frameRate = configs.frameRate),
     ZLayer.succeed(new LogFilter(
-      allowedLogLevel = LogLevel.All,
+      allowedLogLevel = LogLevel.None,
       customScopeRules = Map(
-        "MovementSystem" -> LogLevel.Info,
+//        "StartUpSystem" -> LogLevel.Debug,
+        "Performance.MonitorWindow" -> LogLevel.All,
+        "Performance.MonitorWindow.Metrics" -> LogLevel.None,
       )
     )), // TODO to conf
     ZIOLogger.layer,
-    PerformanceMonitorWindow.layer(metricSendIntervalMillis = 500), // TODO to conf
+    PerformanceMonitorWindow.layer(metricSendIntervalMillis = 40), // TODO to conf
   )
 
   val graphicsAPILayer = ZLayer(ZIO.attempt(graphicsAPI()))

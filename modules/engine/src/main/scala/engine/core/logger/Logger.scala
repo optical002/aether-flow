@@ -10,15 +10,15 @@ import java.time.format.DateTimeFormatter
 
 trait Logger[+Out, Self <: Logger[Out, Self]] {
   def scope: String
-  def logLevel(msg: String, level: LogLevel): Out
+  def logLevel[A: LogMessage](msg: A, level: LogLevel): Out
   def make(scope: String): Self
 
-  def logVerbose(msg: String): Out = logLevel(msg, LogLevel.All)
-  def logInfo(msg: String): Out = logLevel(msg, LogLevel.Info)
-  def logDebug(msg: String): Out = logLevel(msg, LogLevel.Debug)
-  def logWarning(msg: String): Out = logLevel(msg, LogLevel.Warning)
-  def logError(msg: String): Out = logLevel(msg, LogLevel.Error)
-  def logFatal(msg: String): Out = logLevel(msg, LogLevel.Fatal)
+  def logVerbose[A: LogMessage](msg: A): Out = logLevel(msg, LogLevel.All)
+  def logInfo[A: LogMessage](msg: A): Out = logLevel(msg, LogLevel.Info)
+  def logDebug[A: LogMessage](msg: A): Out = logLevel(msg, LogLevel.Debug)
+  def logWarning[A: LogMessage](msg: A): Out = logLevel(msg, LogLevel.Warning)
+  def logError[A: LogMessage](msg: A): Out = logLevel(msg, LogLevel.Error)
+  def logFatal[A: LogMessage](msg: A): Out = logLevel(msg, LogLevel.Fatal)
 
   def scope(innerScope: String): Self = make(s"$scope.$innerScope")
 }

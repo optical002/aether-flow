@@ -6,10 +6,15 @@ class LogFilter(
   allowedLogLevel: LogLevel, customScopeRules: Map[String, LogLevel]
 ) {
   def shouldPrint(scope: String, logLevel: LogLevel): Boolean = {
-    checkLogLevel(trying = logLevel, allowed = customScopeRules.find { case (s, _) => s.contains(scope) } match {
-      case Some((_, scopeAllowedLogLevel)) => scopeAllowedLogLevel
-      case None => allowedLogLevel
-    })
+    checkLogLevel(
+      trying = logLevel, 
+      allowed = customScopeRules
+        .toList
+        .sortBy { case (s, _) => -s.length } // prioritize more specific scopes
+        .find { case (s, _) => scope.contains(s) }
+        .map(_._2)
+        .getOrElse(allowedLogLevel)
+    )
   }
 
   private def checkLogLevel(trying: LogLevel, allowed: LogLevel): Boolean = {

@@ -26,25 +26,28 @@ object FrameCoordinator {
     ecs: Gate,
     render: Gate,
     frameLimiter: Gate,
-    time: Gate
+    time: Gate,
+    frameDurationPerformance: Gate
   ) {
     def updateReady(signalFrom: SignalFrom): Gates = signalFrom match {
-      case SignalFrom.Render    => copy(render = true)
-      case SignalFrom.ECS          => copy(ecs = true)
+      case SignalFrom.Render => copy(render = true)
+      case SignalFrom.ECS => copy(ecs = true)
       case SignalFrom.FrameLimiter => copy(frameLimiter = true)
-      case SignalFrom.Time         => copy(time = true)
+      case SignalFrom.FrameDurationPerformance => copy(frameDurationPerformance = true)
+      case SignalFrom.Time => copy(time = true)
     }
 
     def allowPassage: Boolean = ecs && render && frameLimiter
   }
   object Gates {
-    lazy val empty = Gates(false, false, false, false)
+    lazy val empty = Gates(false, false, false, false, false)
   }
 
   enum SignalFrom {
     case Render
     case ECS
     case FrameLimiter
+    case FrameDurationPerformance
     case Time
   }
 

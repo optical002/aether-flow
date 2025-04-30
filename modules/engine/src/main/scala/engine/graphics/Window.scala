@@ -44,7 +44,7 @@ object Window {
         else for {
           _ <- logger.logVerbose("Waiting for next frame")
           _ <- frameCoordinator.signalReady(Render)
-          _ <- Performance.timeframe(frameDuration("Render"), for {
+          _ <- Performance.timeframe(frameDuration("Window"), for {
             _ <- logger.logVerbose("Initializing queued up assets")
             _ <- db.initializeQueuedUpAssets()
             _ <- logger.logVerbose("Polling events")

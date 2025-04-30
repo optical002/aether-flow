@@ -11,6 +11,7 @@ object PerformanceMetrics {
   val windowStartup = Header(startup, "Window startup")
 
   val fps = Header(update, "FPS")
+  val frameDurationPerformance = Header(update, "Frame Duration")
 
   def frameDuration(name: String) = Header("Computed Single Frame In", name)
   def ecsMetric(name: String) = Header("ECS", name)

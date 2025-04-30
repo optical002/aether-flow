@@ -6,9 +6,11 @@ import zio.*
 class SingleFiberConsoleLogger(
   val scope: String, fiberId: FiberId, logFilter: LogFilter
 ) extends Logger[Unit, SingleFiberConsoleLogger] {
-  override def logLevel(msg: String, level: LogLevel): Unit = {
+  override def logLevel[A: LogMessage](msg: A, level: LogLevel): Unit = {
     if (logFilter.shouldPrint(scope, level)) {
-      println(Logger.formatMessage(msg, logLevel = level, fiberId = fiberId, scopeRaw = scope))
+      println(Logger.formatMessage(
+        summon[LogMessage[A]].asString(msg), logLevel = level, fiberId = fiberId, scopeRaw = scope
+      ))
     }
   }
   

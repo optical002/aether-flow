@@ -7,17 +7,15 @@ import java.io.PrintStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-class ZIOLogger(val scope: String) extends Logger[UIO[Unit], ZIOLogger] {
+class ZIOLogger(
+  val scope: String
+) extends Logger[UIO[Unit], ZIOLogger] {
   import ZIOLogger.*
 
-  override def logLevel(msg: String, level: LogLevel): UIO[Unit] =
-    innerLog(msg, level, scope)
-
-  private def innerLog(msg: String, level: LogLevel, scope: String): UIO[Unit] = {
+  override def logLevel[A: LogMessage](msg: A, level: LogLevel): UIO[Unit] =
     ZIO.logAnnotate(AnnotationKeys.scope, scope) {
-      ZIO.logLevel(level)(ZIO.log(msg))
+      ZIO.logLevel(level)(ZIO.log(summon[LogMessage[A]].asString(msg)))
     }
-  }
 
   override def make(scope: String): ZIOLogger = new ZIOLogger(scope)
   

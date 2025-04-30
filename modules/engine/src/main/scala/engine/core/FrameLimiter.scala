@@ -23,7 +23,7 @@ class FrameLimiter(
           else ZIO.yieldNow *> waitUntil(targetTimeNanos)
         }
 
-      // more precise than sleep, since sleep reschedules fiber running tim e
+      // more precise than sleep, since sleep reschedules fiber running time
       // which gives an overhead of around 10-30ms
       waitUntil(startedAtNanos + toSleepNanos)
     }
