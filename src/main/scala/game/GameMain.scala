@@ -1,12 +1,13 @@
 package game
 
-import engine.core.logger.ZIOLogger
 import engine.*
-import engine.ecs.{Transform, Velocity, World, WorldBuilder}
+import engine.ecs.*
 import engine.graphics.*
 import engine.graphics.config.WindowConfig
 import engine.graphics.opengl.API
 import engine.graphics.opengl.shaders.StandardShader
+import engine.core.logger.ZIOLogger
+
 import zio.*
 
 object GameMain extends engine.App {
@@ -28,6 +29,8 @@ object GameMain extends engine.App {
   ): WorldBuilder = builder
     .addStartUpSystem(StartUpSystem)
     .addSystem(MovementSystem)
+
+  override def enableMetrics: Boolean = true
 }
 
 object StartUpSystem extends ecs.System {

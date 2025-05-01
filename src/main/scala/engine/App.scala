@@ -14,6 +14,7 @@ abstract class App extends ZIOAppDefault {
   def graphicsAPI(): GraphicsAPI
   def render(db: GraphicDatabase): Task[Unit]
   def startupWorld(builder: WorldBuilder): WorldBuilder
+  def enableMetrics: Boolean
 
   private val logger = new ZIOLogger("App")
   
@@ -22,7 +23,7 @@ abstract class App extends ZIOAppDefault {
     time <- ZIO.service[Time]
     _ <- logger.logVerbose("Starting counting time")
     _ <- time.startCounting
-    _ <- PerformanceMetricClient.run
+    _ <- if (enableMetrics) PerformanceMetricClient.run else ZIO.unit
 
     graphicDB <- ZIO.service[GraphicDatabase]
     _ <- render(graphicDB)
@@ -32,7 +33,7 @@ abstract class App extends ZIOAppDefault {
 
     frameDurationFiber <- FrameDurationPerformance.run
     _ <- logger.logVerbose("Starting 'Performance Monitor'")
-    performanceMonitorFiber <- PerformanceMonitorWindow.forkNewWindowApp // TODO enable/disable via conf
+    performanceMonitorFiber <- if (enableMetrics) PerformanceMonitorWindow.forkNewWindowApp else ZIO.unit.fork
     _ <- logger.logVerbose("Starting 'FrameRate'")
     frameLimiterFiber <- frameLimiter.run
     _ <- logger.logVerbose("Starting 'Time'")
