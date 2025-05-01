@@ -1,9 +1,11 @@
 package engine.graphics.opengl
 
-import engine.graphics.config.WindowConfig
 import engine.graphics.*
-import engine.graphics.opengl.shaders.*
+import engine.graphics.config.WindowConfig
+import engine.graphics.opengl.data.{ShaderProgram, ShaderSource}
+import engine.graphics.opengl.shaders.ShaderUtils
 import engine.graphics.opengl.data.*
+import engine.graphics.opengl.shaders.*
 import org.joml.*
 import org.lwjgl.*
 import org.lwjgl.glfw.GLFW.*

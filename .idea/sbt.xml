@@ -8,11 +8,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/modules/editor" />
-            <option value="$PROJECT_DIR$/modules/engine" />
-            <option value="$PROJECT_DIR$/modules/engine/graphics/core" />
-            <option value="$PROJECT_DIR$/modules/engine/graphics/opengl" />
-            <option value="$PROJECT_DIR$/modules/game" />
             <option value="$PROJECT_DIR$/project" />
           </set>
         </option>

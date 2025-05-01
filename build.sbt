@@ -22,55 +22,19 @@ lazy val commonDependencies = Seq(
   "com.lihaoyi" %% "os-lib" % "0.11.4",
 
   // Scalafx
-  "org.scalafx" %% "scalafx" % "24.0.0-R35"
+  "org.scalafx" %% "scalafx" % "24.0.0-R35",
+
+  // Lwjgl
+  "org.lwjgl" % "lwjgl" % lwjglVersion,
+  "org.lwjgl" % "lwjgl-glfw" % lwjglVersion,
+  "org.lwjgl" % "lwjgl-opengl" % lwjglVersion,
+  "org.lwjgl" % "lwjgl" % lwjglVersion classifier "natives-windows",
+  "org.lwjgl" % "lwjgl-glfw" % lwjglVersion classifier "natives-windows",
+  "org.lwjgl" % "lwjgl-opengl" % lwjglVersion classifier "natives-windows",
 )
-
-lazy val graphicsCore = (project in file("modules/engine/graphics/core"))
-  .settings(
-    libraryDependencies ++= commonDependencies
-  )
-
-lazy val openGlGraphics = (project in file("modules/engine/graphics/opengl"))
-  .settings(
-    libraryDependencies ++= Seq(
-      "org.lwjgl" % "lwjgl" % lwjglVersion,
-      "org.lwjgl" % "lwjgl-glfw" % lwjglVersion,
-      "org.lwjgl" % "lwjgl-opengl" % lwjglVersion,
-      "org.lwjgl" % "lwjgl" % lwjglVersion classifier "natives-windows",
-      "org.lwjgl" % "lwjgl-glfw" % lwjglVersion classifier "natives-windows",
-      "org.lwjgl" % "lwjgl-opengl" % lwjglVersion classifier "natives-windows",
-    )
-  ).dependsOn(graphicsCore)
-
-lazy val engine = (project in file("modules/engine"))
-  .settings(
-    libraryDependencies ++= commonDependencies
-  ).dependsOn(graphicsCore)
-
-lazy val editor = (project in file("modules/editor"))
-  .settings(
-    libraryDependencies ++= Seq(
-      "io.github.spair" % "imgui-java-app" % imguiVersion,
-      "io.github.spair" % "imgui-java-binding" % imguiVersion,
-      "io.github.spair" % "imgui-java-lwjgl3" % imguiVersion,
-    )
-  )
-  .dependsOn(engine)
-
-lazy val game = (project in file("modules/game"))
-  .enablePlugins(NativeImagePlugin)
-  .settings(
-    Compile / mainClass := Some("GameMain"),
-    assembly / mainClass := Some("GameMain"),
-    assembly / assemblyMergeStrategy := {
-      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-      case x => MergeStrategy.first
-    },
-  )
-  .dependsOn(engine, openGlGraphics)
 
 lazy val root = (project in file("."))
   .settings(
-    name := "fp-game-engine"
+    name := "fp-game-engine",
+    libraryDependencies ++= commonDependencies,
   )
-  .aggregate(editor, engine, game, graphicsCore, openGlGraphics)

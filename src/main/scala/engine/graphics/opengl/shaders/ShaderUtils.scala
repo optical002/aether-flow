@@ -1,7 +1,7 @@
 package engine.graphics.opengl.shaders
 
-import engine.graphics.opengl.data.*
 import engine.graphics.opengl.data.{CompiledShader, ShaderCompileKind, ShaderProgram, ShaderSource}
+import engine.graphics.opengl.data.*
 import org.lwjgl.*
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL20.*

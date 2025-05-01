@@ -1,9 +1,11 @@
+package game
+
 import engine.core.logger.ZIOLogger
-import engine.ecs
+import engine.*
 import engine.ecs.{Transform, Velocity, World, WorldBuilder}
-import engine.graphics.GraphicsAPI
-import engine.graphics.config.WindowConfig
 import engine.graphics.*
+import engine.graphics.config.WindowConfig
+import engine.graphics.opengl.API
 import engine.graphics.opengl.shaders.StandardShader
 import zio.*
 
@@ -15,7 +17,7 @@ object GameMain extends engine.App {
     val frameRate = 60
   }
 
-  override def graphicsAPI(): GraphicsAPI = opengl.API
+  override def graphicsAPI(): GraphicsAPI = API
 
   override def render(db: GraphicDatabase): Task[Unit] = for {
     _ <- db.load(GraphicAsset(VertexData.Quad, StandardShader))
