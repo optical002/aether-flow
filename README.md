@@ -17,7 +17,7 @@ Add the following to your `build.sbt` inside project settings:
 
 ```scala
 resolvers += "jitpack" at "https://jitpack.io",
-libraryDependencies += "com.github.optical002" % "aether-flow" % "0.1.0-dev"
+libraryDependencies += "com.github.optical002" % "aether-flow" % "0.0.1"
 ```
 
 ### Running simple game window
