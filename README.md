@@ -94,7 +94,7 @@ assembly / assemblyMergeStrategy := {
 4. To install build tools run this from powershell
 
 ```shell
-iwr -useb https://github.com/optical002/aether-flow/releases/download/0.1.0-dev2/install.ps1 | iex
+iwr -useb https://github.com/optical002/aether-flow-tooling/releases/download/build-tools-v0.1.0/install.ps1 | iex
 ```
 
 5. To build execute `build.ps1`
