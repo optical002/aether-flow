@@ -40,6 +40,7 @@ object Main extends engine.App {
     val height = 600
     val frameRate = 60
   }
+  override def enableMetrics: Boolean = false
 
   override def graphicsAPI(): GraphicsAPI = API
 
