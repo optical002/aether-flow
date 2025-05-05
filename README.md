@@ -23,6 +23,8 @@ libraryDependencies += "com.github.optical002" % "aether-flow" % "0.0.1"
 ### Running simple game window
 
 ```scala
+package game
+
 import engine.*
 import engine.ecs.*
 import engine.graphics.*
@@ -33,15 +35,13 @@ import engine.core.logger.ASyncLogger
 
 import zio.*
 
-object Main extends engine.App {
+object GameMain extends engine.App {
   override lazy val configs: WindowConfig = new WindowConfig {
     val title = "Game from Scala FP"
     val width = 800
     val height = 600
     val frameRate = 60
   }
-
-  override def enableMetrics: Boolean = false
 
   override def graphicsAPI(): GraphicsAPI = API
 
@@ -53,24 +53,41 @@ object Main extends engine.App {
     builder: WorldBuilder
   ): WorldBuilder = builder
     .addStartUpSystem(StartUpSystem)
-    .addSystem(MovementSystem)
+    .addSystems(priority = 0, MovementSystem)
+    .addSystems(priority = 1, LogSystem)
+
+  override def enableMetrics: Boolean = false
 }
 
 object StartUpSystem extends ecs.System {
-  override def run(world: World, logger: ASyncLogger): Task[Unit] = ZIO.succeed {
+  override def run(world: World, logger: ASyncLogger): Task[Unit] =
     world.createEntity(Transform(0, 0), Velocity(1, 1))
-  } *> logger.logDebug("Created entity")
+  *> logger.logDebug("Created entity")
 }
-
+object LogSystem extends ecs.System {
+  override def run(world: World, logger: ASyncLogger): Task[Unit] = for {
+    result <- world.query2[Transform, Velocity]
+    strings <- ZIO.foreach(result) { case (e, transformRef, velocityRef) =>
+      for {
+        transform <- transformRef.get.commit
+        velocity <- velocityRef.get.commit
+      } yield s"Entity($e), $transform, $velocity"
+    }
+    _ <- logger.logDebug(
+      s"Entities queried: ${result.length}, [\n  ${strings.mkString(",\n  ")}\n]"
+    )
+  } yield ()
+}
 object MovementSystem extends ecs.System {
   override def run(world: World, logger: ASyncLogger): Task[Unit] = for {
-    _ <- ZIO.succeed {
-      val result = world.query2[Transform, Velocity]
-      for ((id, t, v) <- result) {
-        val moved = t.copy(x = t.x + v.dx, y = t.y + v.dy)
-      }
+    result <- world.query2[Transform, Velocity]
+    _ <- ZIO.foreach(result) { case (_, transformRef, velocityRef) =>
+      for {
+        velocity <- velocityRef.get.commit
+        _ <- transformRef.update(_.applyVelocity(velocity)).commit
+        _ <- logger.logDebug("Moved transform by velocity")
+      } yield ()
     }
-    _ <- logger.logDebug("Moved entity")
   } yield ()
 }
 ```

@@ -12,7 +12,8 @@ import scala.collection.mutable
 
 class WorldBuilder {
   private val startUpSystems: mutable.Buffer[ecs.System] = mutable.Buffer[ecs.System]()
-  private val updateSystems: mutable.Buffer[ecs.System] = mutable.Buffer[ecs.System]()
+  private val priorityUpdateSystems: mutable.Map[Int, mutable.Buffer[ecs.System]] = 
+    mutable.Map[Int, mutable.Buffer[ecs.System]]()
   private val logger = new ASyncLogger("ECS-World")
 
   def addStartUpSystem(system: ecs.System): WorldBuilder = {
@@ -20,8 +21,17 @@ class WorldBuilder {
     this
   }
 
-  def addSystem(system: ecs.System): WorldBuilder = {
-    updateSystems += system
+  def addSystems(priority: Int, systems: ecs.System*): WorldBuilder = {
+    priorityUpdateSystems.get(priority) match {
+      case Some(buffer) => 
+        buffer.addAll(systems)
+      case None => {
+        val newBuffer = mutable.Buffer[ecs.System]()
+        newBuffer.addAll(systems)
+        priorityUpdateSystems.addOne((priority, newBuffer))
+      }
+    }
+    
     this
   }
 
@@ -37,16 +47,19 @@ class WorldBuilder {
           )
         }
       )
+      prioritizedSystems <- ZIO.succeed(priorityUpdateSystems.toSeq.sortBy(_._1).map(_._2))
       _ <- logger.logVerbose("'startUpSystems' initialized")
       _ <- (for {
         _ <- logger.logVerbose("Waiting for next frame")
         _ <- frameCoordinator.signalReady(ECS)
         _ <- logger.logVerbose("Running 'updateSystems'")
         _ <- Performance.timeframe(frameDuration("ECS"),
-          ZIO.foreachPar(updateSystems.toList) { s =>
-            Performance.timeframe(ecsMetric(s.systemName),
-              s.run(world, new ASyncLogger(s.systemName))
-            )
+          ZIO.foreach(prioritizedSystems) { systems =>
+            ZIO.foreachPar(systems) { s =>
+              Performance.timeframe(ecsMetric(s.systemName),
+                s.run(world, new ASyncLogger(s.systemName))
+              )
+            }
           }
         )
         _ <- logger.logVerbose("Finished running 'updateSystems'")

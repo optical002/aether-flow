@@ -28,24 +28,40 @@ object GameMain extends engine.App {
     builder: WorldBuilder
   ): WorldBuilder = builder
     .addStartUpSystem(StartUpSystem)
-    .addSystem(MovementSystem)
+    .addSystems(priority = 0, MovementSystem)
+    .addSystems(priority = 1, LogSystem)
 
   override def enableMetrics: Boolean = false
 }
 
-case class TestComponent(a: Int) extends Component
-
 object StartUpSystem extends ecs.System {
-  override def run(world: World, logger: ASyncLogger): Task[Unit] = 
-    world.createEntity(Transform(0, 0), Velocity(1, 1), TestComponent(1)) 
+  override def run(world: World, logger: ASyncLogger): Task[Unit] =
+    world.createEntity(Transform(0, 0), Velocity(1, 1))
       *> logger.logDebug("Created entity")
+}
+object LogSystem extends ecs.System {
+  override def run(world: World, logger: ASyncLogger): Task[Unit] = for {
+    result <- world.query2[Transform, Velocity]
+    strings <- ZIO.foreach(result) { case (e, transformRef, velocityRef) =>
+      for {
+        transform <- transformRef.get.commit
+        velocity <- velocityRef.get.commit
+      } yield s"Entity($e), $transform, $velocity"
+    }
+    _ <- logger.logDebug(
+      s"Entities queried: ${result.length}, [\n  ${strings.mkString(",\n  ")}\n]"
+    )
+  } yield ()
 }
 object MovementSystem extends ecs.System {
   override def run(world: World, logger: ASyncLogger): Task[Unit] = for {
-    // TODO write tests and try to break it via concurrency
-    result1 <- world.query2[Transform, Velocity]
-    result2 <- world.query2[Transform, TestComponent]
-    result3 <- world.query3[Transform, TestComponent, Velocity]
-    _ <- logger.logDebug(s"Entities queried1: ${result1.length}, Entities queried2: ${result2.length}, Entities queried3: ${result3.length}")
+    result <- world.query2[Transform, Velocity]
+    _ <- ZIO.foreach(result) { case (_, transformRef, velocityRef) =>
+      for {
+        velocity <- velocityRef.get.commit
+        _ <- transformRef.update(_.applyVelocity(velocity)).commit
+        _ <- logger.logDebug("Moved transform by velocity")
+      } yield ()
+    }
   } yield ()
 }
