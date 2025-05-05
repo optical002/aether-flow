@@ -29,7 +29,7 @@ import engine.graphics.*
 import engine.graphics.config.WindowConfig
 import engine.graphics.opengl.API
 import engine.graphics.opengl.shaders.StandardShader
-import engine.core.logger.ZIOLogger
+import engine.core.logger.ASyncLogger
 
 import zio.*
 
@@ -40,6 +40,7 @@ object Main extends engine.App {
     val height = 600
     val frameRate = 60
   }
+
   override def enableMetrics: Boolean = false
 
   override def graphicsAPI(): GraphicsAPI = API
@@ -56,12 +57,13 @@ object Main extends engine.App {
 }
 
 object StartUpSystem extends ecs.System {
-  override def run(world: World, logger: ZIOLogger): Task[Unit] = ZIO.succeed {
+  override def run(world: World, logger: ASyncLogger): Task[Unit] = ZIO.succeed {
     world.createEntity(Transform(0, 0), Velocity(1, 1))
   } *> logger.logDebug("Created entity")
 }
+
 object MovementSystem extends ecs.System {
-  override def run(world: World, logger: ZIOLogger): Task[Unit] = for {
+  override def run(world: World, logger: ASyncLogger): Task[Unit] = for {
     _ <- ZIO.succeed {
       val result = world.query2[Transform, Velocity]
       for ((id, t, v) <- result) {

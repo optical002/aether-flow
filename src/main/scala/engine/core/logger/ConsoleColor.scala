@@ -1,4 +1,4 @@
-package engine.core
+package engine.core.logger
 
 object ConsoleColor {
   val RESET  = "\u001b[0m"

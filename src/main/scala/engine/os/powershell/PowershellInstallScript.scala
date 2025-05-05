@@ -1,13 +1,13 @@
 package engine.os.powershell
 
-import engine.core.logger.ZIOLogger
+import engine.core.logger.ASyncLogger
 import engine.os.*
 import zio.*
 
 trait PowershellInstallScript extends PowershellAppScript {
   import engine.os.Utils.*
   
-  override protected def runInner(logger: ZIOLogger): Task[Boolean] = for {
+  override protected def runInner(logger: ASyncLogger): Task[Boolean] = for {
     isAvailable <- isCommandAvailable(appCommandName)
     isWindowsOs <- isWindowsOs
     result <- (isAvailable, isWindowsOs) match {

@@ -2,7 +2,7 @@ package engine.resources
 
 import engine.core.FrameCoordinator
 import engine.core.FrameCoordinator.SignalFrom
-import engine.core.logger.ZIOLogger
+import engine.core.logger.ASyncLogger
 import engine.performance.Performance
 import engine.performance.PerformanceMetrics.*
 import zio.*
@@ -13,7 +13,7 @@ class Time(
   clock: Clock,
   frameCoordinator: FrameCoordinator,
 ) {
-  private val logger = new ZIOLogger("Time")
+  private val logger = new ASyncLogger("Time")
   
   def startCounting = for {
     startedAtNs <- clock.nanoTime

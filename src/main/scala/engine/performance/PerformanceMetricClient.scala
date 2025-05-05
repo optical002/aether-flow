@@ -5,13 +5,13 @@ import zio.metrics.{MetricKey, MetricState}
 import zio.metrics.connectors.MetricEvent
 import zio.metrics.connectors.internal.MetricsClient
 import engine.core.*
-import engine.core.logger.ZIOLogger
+import engine.core.logger.ASyncLogger
 
 import java.time.Instant
 
 object PerformanceMetricClient {
   import PerformanceDataAggregator.*
-  val logger = new ZIOLogger("Performance.MetricClient")
+  val logger = new ASyncLogger("Performance.MetricClient")
 
   val run = for {
     aggregator <- ZIO.service[PerformanceDataAggregator]

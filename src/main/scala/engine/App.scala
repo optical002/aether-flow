@@ -1,7 +1,7 @@
 package engine
 
 import engine.core.*
-import engine.core.logger.{LogFilter, Logger, ZIOLogger}
+import engine.core.logger.{LogFilter, Logger, ASyncLogger}
 import engine.ecs.*
 import engine.graphics.*
 import engine.graphics.config.*
@@ -16,7 +16,7 @@ abstract class App extends ZIOAppDefault {
   def startupWorld(builder: WorldBuilder): WorldBuilder
   def enableMetrics: Boolean
 
-  private val logger = new ZIOLogger("App")
+  private val logger = new ASyncLogger("App")
   
   val program = for {
     _ <- logger.logVerbose("Starting application")
@@ -71,14 +71,14 @@ abstract class App extends ZIOAppDefault {
     Time.layer,
     FrameLimiter.layer(frameRate = configs.frameRate),
     ZLayer.succeed(new LogFilter(
-      allowedLogLevel = LogLevel.None,
+      allowedLogLevel = LogLevel.Debug,
       customScopeRules = Map(
 //        "StartUpSystem" -> LogLevel.Debug,
         "Performance.MonitorWindow" -> LogLevel.All,
         "Performance.MonitorWindow.Metrics" -> LogLevel.None,
       )
     )), // TODO to conf
-    ZIOLogger.layer,
+    ASyncLogger.layer,
     PerformanceMonitorWindow.layer(metricSendIntervalMillis = 40), // TODO to conf
   )
 

@@ -6,7 +6,7 @@ import engine.graphics.*
 import engine.graphics.config.WindowConfig
 import engine.graphics.opengl.API
 import engine.graphics.opengl.shaders.StandardShader
-import engine.core.logger.ZIOLogger
+import engine.core.logger.ASyncLogger
 
 import zio.*
 
@@ -30,22 +30,22 @@ object GameMain extends engine.App {
     .addStartUpSystem(StartUpSystem)
     .addSystem(MovementSystem)
 
-  override def enableMetrics: Boolean = true
+  override def enableMetrics: Boolean = false
 }
 
+case class TestComponent(a: Int) extends Component
+
 object StartUpSystem extends ecs.System {
-  override def run(world: World, logger: ZIOLogger): Task[Unit] = ZIO.succeed {
-    world.createEntity(Transform(0, 0), Velocity(1, 1))
-  } *> logger.logDebug("Created entity")
+  override def run(world: World, logger: ASyncLogger): Task[Unit] = 
+    world.createEntity(Transform(0, 0), Velocity(1, 1), TestComponent(1)) 
+      *> logger.logDebug("Created entity")
 }
 object MovementSystem extends ecs.System {
-  override def run(world: World, logger: ZIOLogger): Task[Unit] = for {
-    _ <- ZIO.succeed {
-      val result = world.query2[Transform, Velocity]
-      for ((id, t, v) <- result) {
-        val moved = t.copy(x = t.x + v.dx, y = t.y + v.dy)
-      }
-    }
-    _ <- logger.logDebug("Moved entity")
-  }yield ()
+  override def run(world: World, logger: ASyncLogger): Task[Unit] = for {
+    // TODO write tests and try to break it via concurrency
+    result1 <- world.query2[Transform, Velocity]
+    result2 <- world.query2[Transform, TestComponent]
+    result3 <- world.query3[Transform, TestComponent, Velocity]
+    _ <- logger.logDebug(s"Entities queried1: ${result1.length}, Entities queried2: ${result2.length}, Entities queried3: ${result3.length}")
+  } yield ()
 }

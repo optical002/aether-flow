@@ -1,6 +1,6 @@
 package engine.os.powershell.pipelines
 
-import engine.core.logger.ZIOLogger
+import engine.core.logger.ASyncLogger
 import engine.os.docker_compose.*
 import engine.os.powershell.DockerComposePipeline
 import zio.*
@@ -15,7 +15,7 @@ object GraphiteStatsDGrafana extends DockerComposePipeline(
 )
 
 object Test extends ZIOAppDefault {
-  val logger = new ZIOLogger("Test")
+  val logger = new ASyncLogger("Test")
 
   val program = for {
     _ <- GraphiteStatsDGrafana.run(logger)
@@ -25,7 +25,7 @@ object Test extends ZIOAppDefault {
   } yield ()
 
   def run = program.provide(
-    ZIOLogger.allowAllLayer,
+    ASyncLogger.allowAllLayer,
     Scope.default,
   )
 }

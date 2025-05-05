@@ -35,6 +35,6 @@ lazy val commonDependencies = Seq(
 
 lazy val root = (project in file("."))
   .settings(
-    name := "fp-game-engine",
+    name := "aether-flow",
     libraryDependencies ++= commonDependencies,
   )

@@ -3,7 +3,7 @@ package engine.ecs
 import engine.core.FrameCoordinator
 import engine.core.FrameCoordinator.SignalFrom.ECS
 import engine.*
-import engine.core.logger.ZIOLogger
+import engine.core.logger.ASyncLogger
 import engine.performance.Performance
 import engine.performance.PerformanceMetrics.*
 import zio.*
@@ -13,7 +13,7 @@ import scala.collection.mutable
 class WorldBuilder {
   private val startUpSystems: mutable.Buffer[ecs.System] = mutable.Buffer[ecs.System]()
   private val updateSystems: mutable.Buffer[ecs.System] = mutable.Buffer[ecs.System]()
-  private val logger = new ZIOLogger("ECS-World")
+  private val logger = new ASyncLogger("ECS-World")
 
   def addStartUpSystem(system: ecs.System): WorldBuilder = {
     startUpSystems += system
@@ -26,15 +26,14 @@ class WorldBuilder {
   }
 
   def launchWorld = {
-    val world = new World
-
     for {
+      world <- World.create
       frameCoordinator <- ZIO.service[FrameCoordinator]
       _ <- logger.logVerbose("Initializing 'startUpSystems'")
       _ <- Performance.measureLabel(ecsStartup,
         ZIO.foreachPar(startUpSystems.toList){ s => 
           Performance.measureLabel(ecsSystemStartup(s.systemName),
-            s.run(world, new ZIOLogger(s.systemName))
+            s.run(world, new ASyncLogger(s.systemName))
           )
         }
       )
@@ -46,7 +45,7 @@ class WorldBuilder {
         _ <- Performance.timeframe(frameDuration("ECS"),
           ZIO.foreachPar(updateSystems.toList) { s =>
             Performance.timeframe(ecsMetric(s.systemName),
-              s.run(world, new ZIOLogger(s.systemName))
+              s.run(world, new ASyncLogger(s.systemName))
             )
           }
         )

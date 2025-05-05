@@ -8,7 +8,7 @@ import scalafx.scene.control.Button
 import scalafx.scene.input.MouseEvent
 import scalafx.scene.layout.{HBox, Pane, StackPane, VBox}
 import scalafx.stage.{Stage, StageStyle}
-import engine.core.logger.{SingleFiberConsoleLogger, ZIOLogger}
+import engine.core.logger.{SyncLogger, ASyncLogger}
 import engine.utils.*
 import scalafx.Includes.*
 import scalafx.application.{JFXApp3, Platform}
@@ -28,7 +28,7 @@ import scala.collection.*
 
 class PerformanceMonitorWindow(
   aggregator: PerformanceDataAggregator,
-  logger: SingleFiberConsoleLogger,
+  logger: SyncLogger,
   killSwitch: () => Unit,
 ) extends JFXApp3 {
   val metricLogger = logger.scope("Metrics")
@@ -234,7 +234,7 @@ class PerformanceMonitorWindow(
   }
 }
 object PerformanceMonitorWindow {
-  val logger = new ZIOLogger("Performance.MonitorWindow")
+  val logger = new ASyncLogger("Performance.MonitorWindow")
 
   // A hack to kill a 'scalafx' app, when fiber is interrupted, the 'Platform.runLater(Platform.exit())'
   // should happen from the thread the scalafx is running on.

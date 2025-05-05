@@ -2,7 +2,7 @@ package engine.graphics
 
 import engine.core.*
 import engine.core.FrameCoordinator.SignalFrom.Render
-import engine.core.logger.ZIOLogger
+import engine.core.logger.ASyncLogger
 import engine.graphics.config.*
 import engine.performance.Performance
 import engine.performance.PerformanceMetrics.*
@@ -11,7 +11,7 @@ import zio.*
 import java.util.concurrent.Executors
 
 object Window {
-  private val logger = new ZIOLogger("Window")
+  private val logger = new ASyncLogger("Window")
 
   val singleThreadExecutor: UIO[Executor] =
     ZIO.attempt(Executors.newSingleThreadExecutor()).map(Executor.fromJavaExecutor).orDie

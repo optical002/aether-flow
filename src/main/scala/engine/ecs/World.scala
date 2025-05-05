@@ -1,43 +1,77 @@
 package engine.ecs
 
-import scala.collection.{Map, Seq, mutable}
-import scala.reflect.ClassTag
 import engine.ecs.Data.*
+import engine.utils.Types.*
+import zio.*
+import zio.stm.*
 
-class World extends QueryExts {
+import scala.collection.*
+import scala.reflect.ClassTag
+
+class World private(
+  archetypesRef: TVector[Archetype]
+) extends QueryExts {
   private var nextEntityId: Long = 0
-  private val archetypes = mutable.Buffer[Archetype]()
 
-  def createEntity(components: Component*): Entity = {
+  // TODO check if components are not unique, then return an error.
+  def createEntity(components: Component*): UIO[Entity] = {
     val entity = nextEntityId
     nextEntityId += 1
 
-    val types  = components.map(_.getClass).toSet
+    val types = components.map(_.getClass).toSet
     val compsMap: Map[Class[? <: Component], Component] = components.map(c => c.getClass -> c).toMap
-
-    val arch = archetypes.find(_.componentTypes == types)
-      .getOrElse {
-        val newArch = new Archetype(types)
-        archetypes += newArch
-        newArch
+    
+    val maybeLeftToAddEntity = for {
+      archetypes <- archetypesRef.get
+      arch <- archetypes.find(_.componentTypes == types) match {
+        case Some(arch) => 
+          // Add entity later to not block every archetype from other fibers.
+          ZSTM.succeed(Some(arch))
+        case None => 
+          Archetype.createWithEntity(types, entity, compsMap).flatMap { newArch =>
+            archetypesRef.update(_.appended(newArch))
+          }.map(_ => None)
       }
-
-
-    arch.addEntity(entity, compsMap)
-    entity
+    } yield arch
+    
+    maybeLeftToAddEntity.commit.flatMap {
+      case Some(arch) => arch.addEntity(entity, compsMap)
+      case None => ZIO.unit
+    }.map(_ => entity)
   }
 
-  def queryGeneric(components: ClassTag[? <: Component]*): Seq[(Entity, Seq[Component])] = {
+  // TODO check if components are not unique, then return an error.
+  def queryGeneric(components: ClassTag[? <: Component]*): UIO[Seq[(Entity, Seq[TRef[Component]])]] = {
     val componentTypes = components.map(_.runtimeClass.asInstanceOf[Class[? <: Component]])
-    archetypes
-      .filter(_.matches(componentTypes.toSet))
-      .flatMap { arch =>
-        val componentData = componentTypes.map { compType =>
-          arch.components(compType).asInstanceOf[Seq[Component]]
-        }
-        arch.entities.zip(componentData.transpose).map { case (e, comps) =>
-          (e, comps)
+    
+    for {
+      archetypes <- archetypesRef.get.commit
+      data <- ZIO.foreach(archetypes.filter(_.subsetOf(componentTypes.toSet))) { arch =>
+        val transaction = for {
+          componentRefs <- STM.foreach(componentTypes) { cls => // cls for example [Transform, Vector]
+            arch.components.get(cls).map(_.getOrElse(
+              throw new RuntimeException(
+                "Should not happen, we have already filtered every archetype to contain only valid components"
+              )
+            ))
+          }
+          // for example componentLists = [
+          //   Transform -> [Entity1, Entity2, Entity3]
+          //   Vector    -> [Entity1, Entity2, Entity3]
+          // ]
+          componentLists <- STM.foreach(componentRefs)(_.get)
+          entities <- arch.entities.get
+        } yield (entities, componentLists)
+
+        // Move computations outside transaction, some performance increase, because less time to block other
+        // fibers from accessing stm's.
+        transaction.commit.map { case (entities, componentLists) => 
+          entities.zip(componentLists.transpose)
         }
       }
+    } yield data.flatten
   }
+}
+object World {
+  val create: UIO[World] = TRef.make(Vector.empty[Archetype]).map(World(_)).commit
 }

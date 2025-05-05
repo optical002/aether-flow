@@ -1,7 +1,6 @@
 package engine.core.logger
 
-import engine.core.ConsoleColor
-import engine.core.ConsoleColor.*
+import ConsoleColor.*
 import zio.*
 
 import java.io.{OutputStream, PrintStream}

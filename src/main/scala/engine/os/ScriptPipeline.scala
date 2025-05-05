@@ -1,6 +1,6 @@
 package engine.os
 
-import engine.core.logger.ZIOLogger
+import engine.core.logger.ASyncLogger
 import zio.*
 
 trait ScriptPipeline[Data] {
@@ -11,7 +11,7 @@ trait ScriptPipeline[Data] {
   
   def createData: Task[Data]
   
-  def run(logger: ZIOLogger): RIO[Scope, Boolean] = for {
+  def run(logger: ASyncLogger): RIO[Scope, Boolean] = for {
     data <- createData
     result <- ZIO.acquireRelease(
       runScripts(startupScripts(data), logger)
@@ -20,7 +20,7 @@ trait ScriptPipeline[Data] {
 
 
   private def runScripts(
-    scripts: Seq[ShellRunnableScript[?]], logger: ZIOLogger
+    scripts: Seq[ShellRunnableScript[?]], logger: ASyncLogger
   ) = {
     val pipelineLogger = logger.scope(s"Pipeline-$pipelineName")
 

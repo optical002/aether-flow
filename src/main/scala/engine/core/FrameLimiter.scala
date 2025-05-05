@@ -1,6 +1,6 @@
 package engine.core
 
-import engine.core.logger.ZIOLogger
+import engine.core.logger.ASyncLogger
 import zio.*
 
 class FrameLimiter(
@@ -8,7 +8,7 @@ class FrameLimiter(
   frameCoordinator: FrameCoordinator,
   clock: Clock
 ){
-  private val logger = new ZIOLogger("Frame-Limiter")
+  private val logger = new ASyncLogger("Frame-Limiter")
 
   def run = (for {
     _ <- logger.logVerbose("Waiting for next frame")

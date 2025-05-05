@@ -1,31 +1,30 @@
 package engine.core.logger
 
-import engine.core.ConsoleColor
 import zio.*
 
 import java.io.PrintStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-class ZIOLogger(
+class ASyncLogger(
   val scope: String
-) extends Logger[UIO[Unit], ZIOLogger] {
-  import ZIOLogger.*
+) extends Logger[UIO[Unit], ASyncLogger] {
+  import ASyncLogger.*
 
   override def logLevel[A: LogMessage](msg: A, level: LogLevel): UIO[Unit] =
     ZIO.logAnnotate(AnnotationKeys.scope, scope) {
       ZIO.logLevel(level)(ZIO.log(summon[LogMessage[A]].asString(msg)))
     }
 
-  override def make(scope: String): ZIOLogger = new ZIOLogger(scope)
+  override def make(scope: String): ASyncLogger = new ASyncLogger(scope)
   
   // Should get only invoked right before synchronous code to get the right fiber id.
-  def toSyncLogger: URIO[LogFilter, SingleFiberConsoleLogger] = for {
+  def toSyncLogger: URIO[LogFilter, SyncLogger] = for {
     fiberId <- ZIO.fiberId
     logFilter <- ZIO.service[LogFilter]
-  } yield new SingleFiberConsoleLogger(scope, fiberId, logFilter)
+  } yield new SyncLogger(scope, fiberId, logFilter)
 }
-object ZIOLogger {
+object ASyncLogger {
   object AnnotationKeys {
     val scope = "scope"
   }
