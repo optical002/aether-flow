@@ -1,7 +1,7 @@
 package aetherflow.game
 
 import aetherflow.engine.{App, ecs}
-import aetherflow.engine.core.logger.ASyncLogger
+import aetherflow.engine.core.logger.{ASyncLogger, LogFilter}
 import aetherflow.engine.ecs.{Component, World, WorldBuilder}
 import aetherflow.engine.graphics.config.WindowConfig
 import aetherflow.engine.graphics.{GraphicAsset, GraphicDatabase, GraphicsAPI, VertexData}
@@ -9,13 +9,24 @@ import aetherflow.engine.graphics.opengl.API
 import aetherflow.engine.graphics.opengl.shaders.StandardShader
 import zio.*
 
-object GameMain extends App {
+/**
+ * Game app for testing game engine locally without any other repositories/projects.
+ */
+object TestGame extends App {
   override lazy val configs: WindowConfig = new WindowConfig {
     val title = "Game from Scala FP"
     val width = 800
     val height = 600
     val frameRate = 60
   }
+  override def createLogFilter: LogFilter = new LogFilter(
+    allowedLogLevel = LogLevel.Debug,
+    customScopeRules = Map(
+      "StartUpSystem" -> LogLevel.Debug,
+      "Performance.MonitorWindow" -> LogLevel.All,
+      "Performance.MonitorWindow.Metrics" -> LogLevel.None,
+    )
+  )
 
   override def graphicsAPI(): GraphicsAPI = API
 
@@ -29,8 +40,6 @@ object GameMain extends App {
     .addStartUpSystem(StartUpSystem)
     .addSystems(priority = 0, MovementSystem)
     .addSystems(priority = 1, LogSystem)
-
-  override def enableMetrics: Boolean = false
 }
 
 case class Transform(x: Float, y: Float) extends Component {

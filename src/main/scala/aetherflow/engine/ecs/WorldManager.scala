@@ -1,9 +1,18 @@
 package aetherflow.engine.ecs
 
+import aetherflow.engine.core.logger.ASyncLogger
 import zio.*
 
 class WorldManager {
-  def loadWorld(worldBuilder: WorldBuilder) = worldBuilder.launchWorld.fork
+  private val logger = new ASyncLogger("World-Manager")
+  
+  def loadWorld(worldBuilder: WorldBuilder) = { 
+    logger.logVerbose("Starting") *>
+    worldBuilder.launchWorld.onDone(
+      error = _ => logger.logVerbose("Closing with error"),
+      success = _ => logger.logVerbose("Closing")
+    ).fork
+  }
 }
 object WorldManager {
   val layer = ZLayer.succeed(new WorldManager)

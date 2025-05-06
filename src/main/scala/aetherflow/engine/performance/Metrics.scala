@@ -1,7 +1,7 @@
 package aetherflow.engine.performance
 
-object PerformanceMetrics {
-  import PerformanceDataAggregator.*
+object Metrics {
+  import Data.DataAggregator.*
 
   val startup = "Startup"
   val update = "Update"

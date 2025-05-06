@@ -3,7 +3,8 @@ package aetherflow.engine.core.logger
 import zio.*
 
 class LogFilter(
-  allowedLogLevel: LogLevel, customScopeRules: Map[String, LogLevel]
+  allowedLogLevel: LogLevel, 
+  customScopeRules: Map[String, LogLevel] = Map.empty
 ) {
   def shouldPrint(scope: String, logLevel: LogLevel): Boolean = {
     checkLogLevel(

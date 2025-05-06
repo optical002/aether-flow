@@ -4,8 +4,8 @@ import aetherflow.engine.core.FrameCoordinator
 import aetherflow.engine.core.FrameCoordinator.SignalFrom
 import aetherflow.engine.core.logger.ASyncLogger
 import aetherflow.engine.graphics.config.WindowConfig
-import aetherflow.engine.performance.Performance
-import aetherflow.engine.performance.PerformanceMetrics.*
+import aetherflow.engine.performance.API
+import aetherflow.engine.performance.Metrics.*
 import zio.*
 
 import java.util.concurrent.Executors
@@ -16,12 +16,13 @@ object Window {
   val singleThreadExecutor: UIO[Executor] =
     ZIO.attempt(Executors.newSingleThreadExecutor()).map(Executor.fromJavaExecutor).orDie
 
-  def run = (for {
+  def run = for {
+    _ <- logger.logVerbose("Starting")
     _ <- logger.logVerbose("Creating single thread executor")
     exec <- singleThreadExecutor
     _ <- logger.logVerbose("Starting window program on single thread")
     _ <- windowProgram.onExecutor(exec)
-  } yield ()).fork
+  } yield ()
 
   private def windowProgram = for {
     cfg <- ZIO.service[WindowConfig]
@@ -37,14 +38,14 @@ object Window {
     _ <- logger.logVerbose("Creating input system")
     inputSystem <- ZIO.attempt(api.createInputSystem())
     end <- clock.nanoTime
-    _ <- ZIO.succeed[Double](end - start) @@ Performance.labelNs(windowStartup)
+    _ <- ZIO.succeed[Double](end - start) @@ API.labelNs(windowStartup)
     _ <- {
       def loop(): Task[Unit] = {
         if (!window.isActive) logger.logVerbose("Window became inactive")
         else for {
           _ <- logger.logVerbose("Waiting for next frame")
           _ <- frameCoordinator.signalReady(SignalFrom.Render)
-          _ <- Performance.timeframe(frameDuration("Window"), for {
+          _ <- API.timeframe(frameDuration("Window"), for {
             _ <- logger.logVerbose("Initializing queued up assets")
             _ <- db.initializeQueuedUpAssets()
             _ <- logger.logVerbose("Polling events")

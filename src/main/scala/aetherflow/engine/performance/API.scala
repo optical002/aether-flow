@@ -3,8 +3,8 @@ package aetherflow.engine.performance
 import zio.*
 import zio.metrics.Metric
 
-object Performance {
-  import PerformanceDataAggregator.*
+object API {
+  import Data.DataAggregator.*
   
   private def metric(kind: Kind, header: Header) = Metric.gauge(
     s"${kind.name}.${header.asMetricName}"

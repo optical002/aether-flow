@@ -4,8 +4,8 @@ import aetherflow.engine.core.FrameCoordinator
 import aetherflow.engine.core.FrameCoordinator.SignalFrom
 import aetherflow.engine.core.logger.ASyncLogger
 import aetherflow.engine.ecs
-import aetherflow.engine.performance.Performance
-import aetherflow.engine.performance.PerformanceMetrics.*
+import aetherflow.engine.performance.API
+import aetherflow.engine.performance.Metrics.*
 import zio.*
 
 import scala.collection.mutable
@@ -40,9 +40,9 @@ class WorldBuilder {
       world <- World.create
       frameCoordinator <- ZIO.service[FrameCoordinator]
       _ <- logger.logVerbose("Initializing 'startUpSystems'")
-      _ <- Performance.measureLabel(ecsStartup,
+      _ <- API.measureLabel(ecsStartup,
         ZIO.foreachPar(startUpSystems.toList){ s => 
-          Performance.measureLabel(ecsSystemStartup(s.systemName),
+          API.measureLabel(ecsSystemStartup(s.systemName),
             s.run(world, new ASyncLogger(s.systemName))
           )
         }
@@ -53,10 +53,10 @@ class WorldBuilder {
         _ <- logger.logVerbose("Waiting for next frame")
         _ <- frameCoordinator.signalReady(SignalFrom.ECS)
         _ <- logger.logVerbose("Running 'updateSystems'")
-        _ <- Performance.timeframe(frameDuration("ECS"),
+        _ <- API.timeframe(frameDuration("ECS"),
           ZIO.foreach(prioritizedSystems) { systems =>
             ZIO.foreachPar(systems) { s =>
-              Performance.timeframe(ecsMetric(s.systemName),
+              API.timeframe(ecsMetric(s.systemName),
                 s.run(world, new ASyncLogger(s.systemName))
               )
             }

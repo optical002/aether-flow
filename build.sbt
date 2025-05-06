@@ -20,13 +20,12 @@ lazy val commonDependencies = Seq(
   // OS
   "com.lihaoyi" %% "os-lib" % "0.11.4",
 
-  // Scalafx
-  "org.scalafx" %% "scalafx" % "24.0.0-R35",
-
   // Lwjgl
   "org.lwjgl" % "lwjgl" % lwjglVersion,
   "org.lwjgl" % "lwjgl-glfw" % lwjglVersion,
   "org.lwjgl" % "lwjgl-opengl" % lwjglVersion,
+  
+  // Lwjgl windows .dll's
   "org.lwjgl" % "lwjgl" % lwjglVersion classifier "natives-windows",
   "org.lwjgl" % "lwjgl-glfw" % lwjglVersion classifier "natives-windows",
   "org.lwjgl" % "lwjgl-opengl" % lwjglVersion classifier "natives-windows",
