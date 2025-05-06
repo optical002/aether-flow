@@ -98,7 +98,7 @@ object MovementSystem extends ecs.System {
 
 ### Building windows executable
 
-Note: If somehting does not work or break, you can look up example projects which are built specific versions inside my ['aether-flow-examples'](https://github.com/optical002/aether-flow-examples) repository.
+Note: If somehting does not work or break, you can look up example projects which are built with specific versions inside my ['aether-flow-examples'](https://github.com/optical002/aether-flow-examples) repository.
 
 1. Create `plugins.sbt` inside `project` directory and add following
 
