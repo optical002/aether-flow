@@ -1,8 +1,7 @@
 ThisBuild / version := "0.1.0-SNAPSHOT"
-ThisBuild / scalaVersion := "3.6.4"
+ThisBuild / scalaVersion := "3.7.0"
 
 val lwjglVersion = "3.3.6"
-val imguiVersion = "1.89.0"
 val zioVersion = "2.1.17"
 
 lazy val commonDependencies = Seq(
