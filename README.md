@@ -98,6 +98,8 @@ object MovementSystem extends ecs.System {
 
 ### Building windows executable
 
+Note: If somehting does not work or break, you can look up example projects which are built specific versions inside my ['aethre-'](https://github.com/optical002/aether-flow-examples) repository.
+
 1. Create `plugins.sbt` inside `project` directory and add following
 
 ```scala
