@@ -1,38 +1,12 @@
+package aetherflow.game
 
-[![](https://jitpack.io/v/optical002/aether-flow.svg)](https://jitpack.io/#optical002/aether-flow)
-# AetherFlow Game Engine
-
-An attempt to make a purely functional game engine, using ZIO effects and an ECS architecture, which would be extremely 
-simple and convenient to build scalable games fast. Convenience and game development speed are the main goals of
-this project. 
-
-Currently work in progress.
-
-## Getting Started
-
-### Set Up
-
-Add the following to your `build.sbt` inside project settings:
-
-
-```scala
-resolvers += "jitpack" at "https://jitpack.io",
-libraryDependencies += "com.github.optical002" % "aether-flow" % "0.0.1"
-```
-
-### Running simple game window
-
-```scala
-package game
-
-import engine.*
-import engine.ecs.*
-import engine.graphics.*
-import engine.graphics.config.WindowConfig
-import engine.graphics.opengl.API
-import engine.graphics.opengl.shaders.StandardShader
-import engine.core.logger.ASyncLogger
-
+import aetherflow.engine.{App, ecs}
+import aetherflow.engine.core.logger.ASyncLogger
+import aetherflow.engine.ecs.{Component, World, WorldBuilder}
+import aetherflow.engine.graphics.config.WindowConfig
+import aetherflow.engine.graphics.{GraphicAsset, GraphicDatabase, GraphicsAPI, VertexData}
+import aetherflow.engine.graphics.opengl.API
+import aetherflow.engine.graphics.opengl.shaders.StandardShader
 import zio.*
 
 object GameMain extends App {
@@ -59,14 +33,18 @@ object GameMain extends App {
   override def enableMetrics: Boolean = false
 }
 
-object StartUpSystem extends System {
-  override def run(world: World, logger: ASyncLogger): Task[Unit] =
-    world.createEntity(Transform(0, 0), Velocity(1, 1))
-
-  *> logger
-.logDebug("Created entity")
+case class Transform(x: Float, y: Float) extends Component {
+  def applyVelocity(velocity: Velocity): Transform =
+    copy(x = x + velocity.dx, y = y + velocity.dy)
 }
 
+case class Velocity(dx: Float, dy: Float) extends Component
+
+object StartUpSystem extends ecs.System {
+  override def run(world: World, logger: ASyncLogger): Task[Unit] =
+    world.createEntity(Transform(0, 0), Velocity(1, 1))
+      *> logger.logDebug("Created entity")
+}
 object LogSystem extends ecs.System {
   override def run(world: World, logger: ASyncLogger): Task[Unit] = for {
     result <- world.query2[Transform, Velocity]
@@ -81,7 +59,6 @@ object LogSystem extends ecs.System {
     )
   } yield ()
 }
-
 object MovementSystem extends ecs.System {
   override def run(world: World, logger: ASyncLogger): Task[Unit] = for {
     result <- world.query2[Transform, Velocity]
@@ -94,30 +71,3 @@ object MovementSystem extends ecs.System {
     }
   } yield ()
 }
-```
-
-### Building windows executable
-
-1. Create `plugins.sbt` inside `project` directory and add following
-
-```scala
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.1.3")
-```
-
-2. In `build.sbt` inside project settings add main entry point of the game (replace `"Main"` with your main class name)
-
-```scala
-assembly / mainClass := Some("Main"),
-assembly / assemblyMergeStrategy := {
-  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-  case x => MergeStrategy.first
-},
-```
-
-4. To install build tools run this from powershell
-
-```shell
-iwr -useb https://github.com/optical002/aether-flow-tooling/releases/download/build-tools-v0.1.0/install.ps1 | iex
-```
-
-5. To build execute `build.ps1`
