@@ -122,4 +122,4 @@ assembly / assemblyMergeStrategy := {
 iwr -useb https://github.com/optical002/aether-flow-tooling/releases/download/build-tools-v0.1.0/install.ps1 | iex
 ```
 
-5. To build execute `build.ps1`
+5. To build execute `build.ps1`, when working with multiproject layout add `-p project-name` or `--project project-name`
