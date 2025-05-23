@@ -18,6 +18,11 @@ import org.lwjgl.system.MemoryUtil.*
 
 object API extends GraphicsAPI {
   override def init(): Unit = {
+    // https://github.com/glfw/glfw/issues/2680#issuecomment-2710866718
+    println(
+      "Note: If your window does not appear and you are on wayland session on linux, you " +
+      "might want yo try setting `__GL_THREADED_OPTIMIZATIONS=0` env var"
+    )
     if (!glfwInit()) {
       throw new IllegalStateException("Unable to initialize GLFW")
     }

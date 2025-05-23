@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TestGame" type="Application" factoryName="Application">
+    <envs>
+      <env name="__GL_THREADED_OPTIMIZATIONS" value="0" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="aetherflow.game.TestGame" />
+    <module name="aether-flow.main" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="aetherflow.game.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

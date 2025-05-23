@@ -29,6 +29,11 @@ lazy val commonDependencies = Seq(
   "org.lwjgl" % "lwjgl" % lwjglVersion classifier "natives-windows",
   "org.lwjgl" % "lwjgl-glfw" % lwjglVersion classifier "natives-windows",
   "org.lwjgl" % "lwjgl-opengl" % lwjglVersion classifier "natives-windows",
+
+  // Lwjgl linux .dll's
+  "org.lwjgl" % "lwjgl" % lwjglVersion classifier "natives-linux",
+  "org.lwjgl" % "lwjgl-glfw" % lwjglVersion classifier "natives-linux",
+  "org.lwjgl" % "lwjgl-opengl" % lwjglVersion classifier "natives-linux",
 )
 
 lazy val root = (project in file("."))
