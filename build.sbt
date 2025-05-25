@@ -14,7 +14,7 @@ lazy val commonDependencies = Seq(
   // Newtype
   "io.github.arturaz" %% "yantl" % "0.2.4",
 
-  // Vector math library
+  // Java OpenGL Math library
   "org.joml" % "joml" % "1.10.8",
 
   // OS

@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL12.GL_BGR
 import org.lwjgl.opengl.GL15.*
 import org.lwjgl.opengl.GL20.*
 import org.lwjgl.opengl.GL30.*
+import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil.*
 
 
@@ -28,6 +29,14 @@ class Shader private (val programId: Int) {
 
   def setVec4f(name: String, value: Vector4f): Unit =
     glUniform4f(glGetUniformLocation(programId, name), value.x, value.y, value.z, value.w)
+    
+  def setMat4f(name: String, value: Matrix4f): Unit = {
+    val stack = MemoryStack.stackPush()
+    val fb = stack.mallocFloat(16)
+    value.get(fb)
+    glUniformMatrix4fv(glGetUniformLocation(programId, name), false, fb)
+    stack.close()
+  }
 }
 object Shader {
   def create(

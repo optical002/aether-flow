@@ -140,6 +140,12 @@ object Main {
       val greenValue = ((math.sin(timeValue) / 2f) + 0.5f).asInstanceOf[Float]
       standardShader.setVec4f("ourColor", Vector4f(0.0f, greenValue, 0.0f, 1.0f))
 
+      val xOffset = (Math.sin(timeValue) * 0.5).toFloat
+      val transform = new Matrix4f()
+        .translate(xOffset, 0.0f, 0.0f)
+        .rotateY(xOffset * 45)
+      standardShader.setMat4f("transform", transform)
+
       glActiveTexture(GL_TEXTURE0)
       glBindTexture(GL_TEXTURE_2D, texture2Id)
       glActiveTexture(GL_TEXTURE1)
