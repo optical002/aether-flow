@@ -12,6 +12,7 @@ import org.lwjgl.opengl.GL20.*
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil.*
+import aetherflow.math.* 
 
 
 class Shader private (val programId: Int) {
@@ -26,14 +27,11 @@ class Shader private (val programId: Int) {
     
   def setFloat(name: String, value: Float): Unit =
     glUniform1f(glGetUniformLocation(programId, name), value)
-
-  def setVec4f(name: String, value: Vector4f): Unit =
-    glUniform4f(glGetUniformLocation(programId, name), value.x, value.y, value.z, value.w)
     
-  def setMat4f(name: String, value: Matrix4f): Unit = {
+  def setMat4f(name: String, value: Mat4f.Builder): Unit = {
     val stack = MemoryStack.stackPush()
     val fb = stack.mallocFloat(16)
-    value.get(fb)
+    value.fill(fb)
     glUniformMatrix4fv(glGetUniformLocation(programId, name), false, fb)
     stack.close()
   }

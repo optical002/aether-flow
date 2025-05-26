@@ -15,24 +15,85 @@ import org.lwjgl.opengl.GL20.*
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil.*
+import aetherflow.math.*
 
 object Main {
+  val screenWidth = 800
+  val screenHeight = 600
+//  val vertices: Array[Float] = Array[Float](
+//    // positions       // colors         // texture coords
+//     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+//     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+//    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+//    -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top left
+//  )
+//  val indices: Array[Int] = Array[Int]( // note that we start from 0!
+//    0, 1, 3, // first triangle
+//    1, 2, 3, // second triangle
+//  )
+  // 3d box
   val vertices: Array[Float] = Array[Float](
-    // positions       // colors         // texture coords
-     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-    -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top left
-  )
-  val indices: Array[Int] = Array[Int]( // note that we start from 0!
-    0, 1, 3, // first triangle
-    1, 2, 3, // second triangle
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f
   )
   val texCoords: Array[Float] = Array[Float](
     0.0f, 0.0f, // lower-left corner
     1.0f, 0.0f, // lower-right corer
     0.5f, 1.0f, // top-center corner
   )
+
+  val cubePositions: Array[Vec3f] = Array[Vec3f](
+    Vec3f( 0.0f, 0.0f, 0.0f),
+    Vec3f( 2.0f, 5.0f, -15.0f),
+    Vec3f(-1.5f, -2.2f, -2.5f),
+    Vec3f(-3.8f, -2.0f, -12.3f),
+    Vec3f( 2.4f, -0.4f, -3.5f),
+    Vec3f(-1.7f, 3.0f, -7.5f),
+    Vec3f( 1.3f, -2.0f, -2.5f),
+    Vec3f( 1.5f, 2.0f, -2.5f),
+    Vec3f( 1.5f, 0.2f, -1.5f),
+    Vec3f(-1.3f, 1.0f, -1.5f),
+  )
+
+  val cameraFront = Vec3f.back
+  val cameraUp = Vec3f.up
+
+  var cameraPos = new Vec3f(0.0f, 0.0f, 3.0f)
+
 
   def loadTexture(path: String): Int = {
     val stack = MemoryStack.stackPush()
@@ -75,7 +136,7 @@ object Main {
     }
 
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
-    val window = glfwCreateWindow(800, 600, "Hello World!", NULL, NULL)
+    val window = glfwCreateWindow(screenWidth, screenHeight, "Hello World!", NULL, NULL)
     if (window == NULL) {
       throw new RuntimeException("Failed to create the GLFW window")
     }
@@ -83,12 +144,12 @@ object Main {
     glfwMakeContextCurrent(window)
     createCapabilities()
 
-    glViewport(0, 0, 800, 600)
+    glViewport(0, 0, screenWidth, screenHeight)
 
     // Triangle start
     val vao = glGenVertexArrays()
     val vbo = glGenBuffers()
-    val ebo = glGenBuffers()
+//    val ebo = glGenBuffers()
 
     glBindVertexArray(vao)
 
@@ -97,17 +158,15 @@ object Main {
     vboBuffer.put(vertices).flip()
     glBufferData(GL_ARRAY_BUFFER, vboBuffer, GL_STATIC_DRAW)
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
-    val eboBuffer = BufferUtils.createIntBuffer(indices.length)
-    eboBuffer.put(indices).flip()
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, eboBuffer, GL_STATIC_DRAW)
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
+//    val eboBuffer = BufferUtils.createIntBuffer(indices.length)
+//    eboBuffer.put(indices).flip()
+//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, eboBuffer, GL_STATIC_DRAW)
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * 4, 0)
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * 4, 0)
     glEnableVertexAttribArray(0)
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * 4, 3 * 4)
+    glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * 4, 3 * 4)
     glEnableVertexAttribArray(1)
-    glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * 4, 6 * 4)
-    glEnableVertexAttribArray(2)
 
 
     glBindBuffer(GL_ARRAY_BUFFER, 0)
@@ -126,33 +185,67 @@ object Main {
     standardShader.setInt("texture1", 0)
     standardShader.setInt("texture2", 1)
 
+    glEnable(GL_DEPTH_TEST)
+
     while (!glfwWindowShouldClose(window)) {
       // input
       processInput(window)
 
       // rendering commands here
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f)
-      glClear(GL_COLOR_BUFFER_BIT)
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
       standardShader.use()
-
-      val timeValue = glfwGetTime()
-      val greenValue = ((math.sin(timeValue) / 2f) + 0.5f).asInstanceOf[Float]
-      standardShader.setVec4f("ourColor", Vector4f(0.0f, greenValue, 0.0f, 1.0f))
-
-      val xOffset = (Math.sin(timeValue) * 0.5).toFloat
-      val transform = new Matrix4f()
-        .translate(xOffset, 0.0f, 0.0f)
-        .rotateY(xOffset * 45)
-      standardShader.setMat4f("transform", transform)
 
       glActiveTexture(GL_TEXTURE0)
       glBindTexture(GL_TEXTURE_2D, texture2Id)
       glActiveTexture(GL_TEXTURE1)
       glBindTexture(GL_TEXTURE_2D, texture1Id)
-
       glBindVertexArray(vao)
-      glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0)
+
+      def remap01(value: Float, min: Float, max: Float): Float = {
+        min + (max - min) * value
+      }
+      
+      val view = Mat4f.Builder.takeIdentityInstance
+        .lookAt(
+          cameraPos,
+          cameraPos ++ cameraFront,
+          cameraUp
+        )
+      standardShader.setMat4f("view", view)
+
+      val fov = Math.toRadians(90).toFloat
+      val aspect = screenWidth / screenHeight
+      val nearPlane = 0.1f
+      val farPlane = 100.0f
+      val projection = new Matrix4f()
+        .perspective(fov, aspect, nearPlane, farPlane)
+      standardShader.setMat4f("projection", projection)
+
+      val timeValue = glfwGetTime()
+      var i = 0
+      for (cubePosition <- cubePositions) {
+        val angle = 20.0f * i
+        i += 1
+        val model = new Matrix4f()
+          .translate(cubePosition)
+          .rotate(
+            Math.toRadians(angle),
+            new Vector3f(0.5f, 1.0f, 0.0f)
+          )
+        standardShader.setMat4f("model", model)
+        glDrawArrays(GL_TRIANGLES, 0, 36)
+      }
+
+      val sinValue = Math.abs(Math.sin(timeValue)).toFloat
+      val model = new Matrix4f()
+        .translate(0.0f, 0.0f, 0.0f)
+        .rotate(
+          (timeValue * Math.toRadians(50)).toFloat,
+          new Vector3f(0.5f, 1.0f, 0.0f)
+        )
+      standardShader.setMat4f("model", model)
 
       glUseProgram(0)
 
@@ -167,6 +260,21 @@ object Main {
   def processInput(window: Long): Unit = {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
       glfwSetWindowShouldClose(window, true)
+    }
+
+    val cameraSpeed = 0.05f
+    val cameraSpeed2 = 1.05f
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+      cameraPos ++= cameraFront * cameraSpeed 
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+      cameraPos --= cameraFront * cameraSpeed
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+      cameraPos --= cameraFront.cross(cameraUp).normalize * cameraSpeed
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+      cameraPos ++= cameraFront.cross(cameraUp).normalize * cameraSpeed
     }
   }
 }
