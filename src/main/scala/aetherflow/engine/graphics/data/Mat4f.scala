@@ -1,7 +1,8 @@
-package aetherflow.math
+package aetherflow.engine.graphics.data
 
-import aetherflow.renderEngine.Camera
+import aetherflow.engine.utils.DynamicPool
 import org.joml.*
+import org.joml.Math.*
 
 import java.nio.FloatBuffer
 
@@ -28,7 +29,7 @@ object Mat4f {
       mat.get(fb)
       fb
     }
-    
+
     def loadIdentity: Builder = load(identity)
     def load(m: Mat4f): Builder = {
       mat.m00(m.m00)
@@ -50,38 +51,47 @@ object Mat4f {
       mat.assume(m.properties)
       this
     }
-    
+
     def viewFromCamera(camera: Camera): Mat4f.Builder =
       camera.updateViewMatrix(this)
-    
-    def lookAt(eye: Vec3f, center: Vec3f, up: Vec3f): Mat4f.Builder = 
+
+    def lookAt(eye: Vec3f, center: Vec3f, up: Vec3f): Mat4f.Builder =
       lookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z)
     def lookAt(
-      eyeX: Float, eyeY: Float, eyeZ: Float, 
-      centerX: Float, centerY: Float, centerZ: Float, 
+      eyeX: Float, eyeY: Float, eyeZ: Float,
+      centerX: Float, centerY: Float, centerZ: Float,
       upX: Float, upY: Float, upZ: Float
     ): Mat4f.Builder = {
       mat.lookAt(eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ)
       this
     }
-    
+
     def perspective(fov: Float, aspect: Float, near: Float, far: Float): Mat4f.Builder = {
       mat.perspective(fov, aspect, near, far)
       this
     }
-    
+
     def translate(t: Vec3f): Mat4f.Builder = translate(t.x, t.y, t.z)
     def translate(x: Float, y: Float, z: Float): Mat4f.Builder = {
       mat.translate(x, y, z)
       this
     }
-    
+
     def rotate(angle: Float, axis: Vec3f): Mat4f.Builder = rotate(angle, axis.x, axis.y, axis.z)
     def rotate(angle: Float, x: Float, y: Float, z: Float): Mat4f.Builder = {
       mat.rotate(angle, x, y, z)
       this
     }
     
+    def rotateEuler(v: Vec3f): Mat4f.Builder = rotateEuler(v.x, v.y, v.z)
+    def rotateEuler(x: Float, y: Float, z: Float): Mat4f.Builder = {
+      mat
+        .rotateX(toRadians(x))
+        .rotateY(toRadians(y))
+        .rotateZ(toRadians(z))
+      this
+    }
+
     def scale(s: Vec3f): Mat4f.Builder = scale(s.x, s.y, s.z)
     def scale(x: Float, y: Float, z: Float): Mat4f.Builder = {
       mat.scale(x, y, z)

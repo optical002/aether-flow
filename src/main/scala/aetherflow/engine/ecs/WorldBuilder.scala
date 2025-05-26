@@ -25,25 +25,23 @@ class WorldBuilder {
     priorityUpdateSystems.get(priority) match {
       case Some(buffer) => 
         buffer.addAll(systems)
-      case None => {
+      case None =>
         val newBuffer = mutable.Buffer[ecs.System]()
         newBuffer.addAll(systems)
         priorityUpdateSystems.addOne((priority, newBuffer))
-      }
     }
     
     this
   }
 
-  def launchWorld = {
+  def launchWorld(ecsStateMachine: EcsStateMachine) = {
     for {
-      world <- World.create
       frameCoordinator <- ZIO.service[FrameCoordinator]
       _ <- logger.logVerbose("Initializing 'startUpSystems'")
       _ <- API.measureLabel(ecsStartup,
-        ZIO.foreachPar(startUpSystems.toList){ s => 
+        ZIO.foreachPar(startUpSystems.toList){ s =>
           API.measureLabel(ecsSystemStartup(s.systemName),
-            s.run(world, new ASyncLogger(s.systemName))
+            s.run(ecsStateMachine, new ASyncLogger(s.systemName))
           )
         }
       )
@@ -57,7 +55,7 @@ class WorldBuilder {
           ZIO.foreach(prioritizedSystems) { systems =>
             ZIO.foreachPar(systems) { s =>
               API.timeframe(ecsMetric(s.systemName),
-                s.run(world, new ASyncLogger(s.systemName))
+                s.run(ecsStateMachine, new ASyncLogger(s.systemName))
               )
             }
           }

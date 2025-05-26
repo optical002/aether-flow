@@ -1,4 +1,4 @@
-package aetherflow.renderEngine
+package aetherflow.engine.utils
 
 import scala.io.Source
 

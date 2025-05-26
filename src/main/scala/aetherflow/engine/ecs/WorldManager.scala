@@ -6,9 +6,9 @@ import zio.*
 class WorldManager {
   private val logger = new ASyncLogger("World-Manager")
   
-  def loadWorld(worldBuilder: WorldBuilder) = { 
+  def loadWorld(worldBuilder: WorldBuilder, ecsStateMachine: EcsStateMachine) = {
     logger.logVerbose("Starting") *>
-    worldBuilder.launchWorld.onDone(
+    worldBuilder.launchWorld(ecsStateMachine).onDone(
       error = _ => logger.logVerbose("Closing with error"),
       success = _ => logger.logVerbose("Closing")
     ).fork

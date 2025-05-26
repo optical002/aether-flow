@@ -1,6 +1,6 @@
-package aetherflow.renderEngine
+package aetherflow.engine.graphics.data
 
-import aetherflow.math.*
+import aetherflow.engine.graphics.data.{Mat4f, Vec3f}
 import org.joml.Math.*
 import org.lwjgl.glfw.GLFW.*
 

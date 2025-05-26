@@ -7,7 +7,7 @@ import aetherflow.engine.utils.Types.*
 import scala.collection.*
 import scala.reflect.ClassTag
 
-class World private(
+class EcsStateMachine private(
   archetypesRef: TVector[Archetype]
 ) extends QueryExts {
   private var nextEntityId: Long = 0
@@ -71,6 +71,6 @@ class World private(
     } yield data.flatten
   }
 }
-object World {
-  val create: UIO[World] = TRef.make(Vector.empty[Archetype]).map(World(_)).commit
+object EcsStateMachine {
+  val create: UIO[EcsStateMachine] = TRef.make(Vector.empty[Archetype]).map(EcsStateMachine(_)).commit
 }

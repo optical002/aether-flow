@@ -12,7 +12,7 @@ import aetherflow.engine.utils.Extensions.*
 trait QueryExts
 object QueryExts {
 
-  extension (world: World) {
+  extension (world: EcsStateMachine) {
     def query1[
       A1 <: Component : ClassTag,
     ]: UIO[Seq[(Entity, CompRef[A1])]] =

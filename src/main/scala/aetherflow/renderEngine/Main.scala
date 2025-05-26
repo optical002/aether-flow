@@ -1,5 +1,8 @@
 package aetherflow.renderEngine
 
+import aetherflow.engine.graphics.Util
+import aetherflow.engine.graphics.data.{Camera, Mat4f, Shader, Vec3f}
+import aetherflow.engine.utils.Resources
 import org.joml.*
 import org.lwjgl.*
 import org.lwjgl.stb.STBImage.*
@@ -15,22 +18,10 @@ import org.lwjgl.opengl.GL20.*
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil.*
-import aetherflow.math.*
 
 object Main {
   val screenWidth = 800
   val screenHeight = 600
-//  val vertices: Array[Float] = Array[Float](
-//    // positions       // colors         // texture coords
-//     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-//     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-//    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-//    -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top left
-//  )
-//  val indices: Array[Int] = Array[Int]( // note that we start from 0!
-//    0, 1, 3, // first triangle
-//    1, 2, 3, // second triangle
-//  )
   // 3d box
   val vertices: Array[Float] = Array[Float](
     -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
@@ -70,11 +61,6 @@ object Main {
     -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
     -0.5f, 0.5f, -0.5f, 0.0f, 1.0f
   )
-  val texCoords: Array[Float] = Array[Float](
-    0.0f, 0.0f, // lower-left corner
-    1.0f, 0.0f, // lower-right corer
-    0.5f, 1.0f, // top-center corner
-  )
 
   val cubePositions: Array[Vec3f] = Array[Vec3f](
     Vec3f( 0.0f, 0.0f, 0.0f),
@@ -89,40 +75,7 @@ object Main {
     Vec3f(-1.3f, 1.0f, -1.5f),
   )
 
-  def loadTexture(path: String): Int = {
-    val stack = MemoryStack.stackPush()
-    val width = stack.mallocInt(1)
-    val height = stack.mallocInt(1)
-    val channels = stack.mallocInt(1)
 
-    stbi_set_flip_vertically_on_load(true)
-    val image = stbi_load(path, width, height, channels, 4) // Force RGBA
-    if (image == null) {
-      throw new RuntimeException(s"Failed to load image: ${stbi_failure_reason()}")
-    }
-
-    val textureId = glGenTextures()
-    glBindTexture(GL_TEXTURE_2D, textureId)
-    glTexImage2D(
-      GL_TEXTURE_2D,
-      0,
-      GL_RGBA,
-      width.get(0),
-      height.get(0),
-      0,
-      GL_RGBA,
-      GL_UNSIGNED_BYTE,
-      image
-    )
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    glGenerateMipmap(GL_TEXTURE_2D)
-
-    glBindTexture(GL_TEXTURE_2D, 0)
-    stbi_image_free(image)
-    stack.close()
-    textureId
-  }
 
   def main(args: Array[String]): Unit = {
     if (!glfwInit()) {
@@ -172,8 +125,8 @@ object Main {
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) // <- wireframe
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL) // <- solid
 
-    val texture1Id = loadTexture(Resources.getPath("textures/wall.png"))
-    val texture2Id = loadTexture(Resources.getPath("textures/f_sleep.png"))
+    val texture1Id = Util.loadTexture(Resources.getPath("textures/wall.png"))
+    val texture2Id = Util.loadTexture(Resources.getPath("textures/f_sleep.png"))
 
     standardShader.use()
     standardShader.setInt("texture1", 0)
@@ -184,7 +137,7 @@ object Main {
     val camera = Camera.create(
       config = Camera.Config(movementSpeed = 0.1f),
       position = Vec3f(0, 0, 3),
-      window =window
+      window = window
     )
 
     val matBuilderResource = Mat4f.Builder.instances.takeEntry

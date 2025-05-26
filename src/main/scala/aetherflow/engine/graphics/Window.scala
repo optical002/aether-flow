@@ -6,7 +6,27 @@ import aetherflow.engine.core.logger.ASyncLogger
 import aetherflow.engine.graphics.config.WindowConfig
 import aetherflow.engine.performance.API
 import aetherflow.engine.performance.Metrics.*
+import aetherflow.engine.*
+import aetherflow.engine.components.*
+import aetherflow.engine.components.Renderer.Initialized
+import aetherflow.engine.ecs.{Component, EcsStateMachine}
+import aetherflow.engine.graphics.data.{Camera, Mat4f, Mesh, Shader, ShaderSource, Vec3f}
+import aetherflow.engine.utils.Resources
 import zio.*
+import zio.stm.*
+import org.joml.*
+import org.lwjgl.*
+import org.lwjgl.glfw.GLFW.*
+import org.lwjgl.opengl.GL
+import org.lwjgl.opengl.GL.*
+import org.lwjgl.opengl.GL11.*
+import org.lwjgl.opengl.GL12.*
+import org.lwjgl.opengl.GL13.*
+import org.lwjgl.opengl.GL14.*
+import org.lwjgl.opengl.GL15.*
+import org.lwjgl.opengl.GL20.*
+import org.lwjgl.opengl.GL30.*
+import org.lwjgl.system.MemoryUtil.*
 
 import java.util.concurrent.Executors
 
@@ -16,18 +36,17 @@ object Window {
   val singleThreadExecutor: UIO[Executor] =
     ZIO.attempt(Executors.newSingleThreadExecutor()).map(Executor.fromJavaExecutor).orDie
 
-  def run = for {
+  def run(ecsStateMachine: EcsStateMachine) = for {
     _ <- logger.logVerbose("Starting")
     _ <- logger.logVerbose("Creating single thread executor")
     exec <- singleThreadExecutor
     _ <- logger.logVerbose("Starting window program on single thread")
-    _ <- windowProgram.onExecutor(exec)
+    _ <- windowProgram(ecsStateMachine).onExecutor(exec)
   } yield ()
 
-  private def windowProgram = for {
+  private def windowProgram(ecsStateMachine: EcsStateMachine) = for {
     cfg <- ZIO.service[WindowConfig]
     api <- ZIO.service[GraphicsAPI]
-    db <- ZIO.service[GraphicDatabase]
     clock <- ZIO.clock
     start <- clock.nanoTime
     frameCoordinator <- ZIO.service[FrameCoordinator]
@@ -36,7 +55,6 @@ object Window {
     _ <- logger.logVerbose("Creating window")
     window <- ZIO.attempt(api.createWindow(cfg))
     _ <- logger.logVerbose("Creating input system")
-    inputSystem <- ZIO.attempt(api.createInputSystem())
     end <- clock.nanoTime
     _ <- ZIO.succeed[Double](end - start) @@ API.labelNs(windowStartup)
     _ <- {
@@ -47,13 +65,13 @@ object Window {
           _ <- frameCoordinator.signalReady(SignalFrom.Render)
           _ <- API.timeframe(frameDuration("Window"), for {
             _ <- logger.logVerbose("Initializing queued up assets")
-            _ <- db.initializeQueuedUpAssets()
-            _ <- logger.logVerbose("Polling events")
-            _ <- ZIO.attempt(inputSystem.pollEvents())
+            _ <- window.initializeRenderers(ecsStateMachine)
+            _ <- logger.logVerbose("Processing input")
+            _ <- ZIO.attempt(window.processInput())
             _ <- logger.logVerbose("Clearing screen")
             _ <- ZIO.attempt(window.clearScreen())
-            _ <- logger.logVerbose("Rendering all assets")
-            _ <- db.renderAllAssets()
+            _ <- logger.logVerbose("Rendering all renderers")
+            _ <- window.renderRenderers(ecsStateMachine, cfg)
             _ <- logger.logVerbose("Swapping buffers")
             _ <- ZIO.attempt(window.swapBuffers())
           } yield ())
@@ -66,8 +84,8 @@ object Window {
     _ <- logger.logVerbose("Closing window")
     _ <- ZIO.attempt(window.close())
     _ <- logger.logVerbose("Unloading all assets")
-    _ <- db.unloadAll()
     _ <- logger.logVerbose("Closing graphics api")
     _ <- ZIO.attempt(api.close())
   } yield ()
 }
+ 

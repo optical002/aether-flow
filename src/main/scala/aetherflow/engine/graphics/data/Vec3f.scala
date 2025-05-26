@@ -1,4 +1,4 @@
-package aetherflow.math
+package aetherflow.engine.graphics.data
 
 import org.joml.{Math, Matrix4f}
 

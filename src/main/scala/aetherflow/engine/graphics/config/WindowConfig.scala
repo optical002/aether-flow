@@ -5,4 +5,6 @@ trait WindowConfig {
   val width: Int
   val height: Int
   val frameRate: Int
+  
+  lazy val aspectRatio: Float = width.toFloat / height
 }

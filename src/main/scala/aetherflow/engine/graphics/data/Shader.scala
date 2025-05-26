@@ -1,5 +1,6 @@
-package aetherflow.renderEngine
+package aetherflow.engine.graphics.data
 
+import aetherflow.engine.utils.Resources
 import org.joml.*
 import org.lwjgl.*
 import org.lwjgl.glfw.GLFW.*
@@ -12,22 +13,20 @@ import org.lwjgl.opengl.GL20.*
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil.*
-import aetherflow.math.* 
 
-
-class Shader private (val programId: Int) {
-  def use(): Unit = 
+class Shader private(val programId: Int) {
+  def use(): Unit =
     glUseProgram(programId)
-    
+
   def setBool(name: String, value: Boolean): Unit =
     glUniform1i(glGetUniformLocation(programId, name), if (value) 1 else 0)
-    
+
   def setInt(name: String, value: Int): Unit =
     glUniform1i(glGetUniformLocation(programId, name), value)
-    
+
   def setFloat(name: String, value: Float): Unit =
     glUniform1f(glGetUniformLocation(programId, name), value)
-    
+
   def setMat4f(name: String, value: Mat4f.Builder): Unit = {
     val stack = MemoryStack.stackPush()
     val fb = stack.mallocFloat(16)
@@ -36,7 +35,13 @@ class Shader private (val programId: Int) {
     stack.close()
   }
 }
+
 object Shader {
+  def create(source: ShaderSource): Shader = create(
+    vertexShaderSourcePath = source.vertPath,
+    fragmentShaderSourcePath = source.fragPath
+  )
+
   def create(
     vertexShaderSourcePath: String,
     fragmentShaderSourcePath: String
@@ -50,7 +55,7 @@ object Shader {
     if (glGetShaderi(vertexShader, GL_COMPILE_STATUS) != GL_TRUE) {
       throw new RuntimeException(
         s"Vertex (path=$vertexShaderSourcePath) shader compilation failed with " +
-        s"error: ${glGetShaderInfoLog(vertexShader)} "
+          s"error: ${glGetShaderInfoLog(vertexShader)} "
       )
     }
 
@@ -63,7 +68,7 @@ object Shader {
           s"error: ${glGetShaderInfoLog(fragmentShader)} "
       )
     }
-    
+
     val programId = glCreateProgram()
     glAttachShader(programId, vertexShader)
     glAttachShader(programId, fragmentShader)
@@ -73,15 +78,21 @@ object Shader {
         s"Program linking failed with error: ${glGetProgramInfoLog(programId)}"
       )
     }
-    
+
     glDeleteShader(vertexShader)
     glDeleteShader(fragmentShader)
 
     new Shader(programId)
   }
 
-  lazy val standard = create(
+  def standard = create(
     vertexShaderSourcePath = "shaders/standard.vert",
     fragmentShaderSourcePath = "shaders/standard.frag"
   )
+
+  def standardSource = ShaderSource(
+    vertPath = "shaders/standard.vert",
+    fragPath = "shaders/standard.frag"
+  )
 }
+

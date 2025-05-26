@@ -1,4 +1,4 @@
-package aetherflow.math
+package aetherflow.engine.utils
 
 import scala.collection.*
 
