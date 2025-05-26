@@ -1,6 +1,8 @@
 package aetherflow.math
 
+import aetherflow.renderEngine.Camera
 import org.joml.*
+
 import java.nio.FloatBuffer
 
 case class Mat4f private (
@@ -48,6 +50,9 @@ object Mat4f {
       mat.assume(m.properties)
       this
     }
+    
+    def viewFromCamera(camera: Camera): Mat4f.Builder =
+      camera.updateViewMatrix(this)
     
     def lookAt(eye: Vec3f, center: Vec3f, up: Vec3f): Mat4f.Builder = 
       lookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z)

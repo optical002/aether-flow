@@ -89,12 +89,6 @@ object Main {
     Vec3f(-1.3f, 1.0f, -1.5f),
   )
 
-  val cameraFront = Vec3f.back
-  val cameraUp = Vec3f.up
-
-  var cameraPos = new Vec3f(0.0f, 0.0f, 3.0f)
-
-
   def loadTexture(path: String): Int = {
     val stack = MemoryStack.stackPush()
     val width = stack.mallocInt(1)
@@ -186,13 +180,19 @@ object Main {
     standardShader.setInt("texture2", 1)
 
     glEnable(GL_DEPTH_TEST)
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
+    val camera = Camera.create(
+      config = Camera.Config(movementSpeed = 0.1f),
+      position = Vec3f(0, 0, 3),
+      window =window
+    )
 
     val matBuilderResource = Mat4f.Builder.instances.takeEntry
     val matBuilder = matBuilderResource.resource
 
     while (!glfwWindowShouldClose(window)) {
       // input
-      processInput(window)
+      processInput(window, camera)
 
       // rendering commands here
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f)
@@ -213,20 +213,17 @@ object Main {
 
       val view = matBuilder
         .loadIdentity
-        .lookAt(
-          cameraPos,
-          cameraPos ++ cameraFront,
-          cameraUp
-        )
+        .viewFromCamera(camera)
       standardShader.setMat4f("view", view)
 
-      val fov = Math.toRadians(90)
-      val aspect = screenWidth / screenHeight
-      val nearPlane = 0.1f
-      val farPlane = 100.0f
       val projection = matBuilder
         .loadIdentity
-        .perspective(fov, aspect, nearPlane, farPlane)
+        .perspective(
+          fov = Math.toRadians(camera.getZoom),
+          aspect = screenWidth / screenHeight,
+          near = 0.1f,
+          far = 100.0f
+        )
       standardShader.setMat4f("projection", projection)
 
       var i = 0
@@ -255,23 +252,11 @@ object Main {
     glfwTerminate()
   }
 
-  def processInput(window: Long): Unit = {
+  def processInput(window: Long, camera: Camera): Unit = {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
       glfwSetWindowShouldClose(window, true)
     }
 
-    val cameraSpeed = 0.05f
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-      cameraPos ++= cameraFront * cameraSpeed
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-      cameraPos --= cameraFront * cameraSpeed
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-      cameraPos --= cameraFront.cross(cameraUp).normalize * cameraSpeed
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-      cameraPos ++= cameraFront.cross(cameraUp).normalize * cameraSpeed
-    }
+    camera.processInput(window)
   }
 }
