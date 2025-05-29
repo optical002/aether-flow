@@ -12,7 +12,14 @@ case class Mat4f private (
   m02: Float, m12: Float, m22: Float, m32: Float,
   m03: Float, m13: Float, m23: Float, m33: Float,
   properties: Int
-)
+) {
+  def fill(fb: FloatBuffer): FloatBuffer = {
+    Mat4f.Builder.instances.acquire { matBuilder =>
+      matBuilder.load(this).fill(fb)
+    }
+    fb
+  }
+}
 object Mat4f {
   private lazy val identity = Mat4f(
     1, 0, 0, 0,
@@ -25,6 +32,16 @@ object Mat4f {
   class Builder private (
     private val mat: Matrix4f = new Matrix4f()
   ) {
+    def build: Mat4f = {
+      Mat4f(
+        mat.m00, mat.m10, mat.m20, mat.m30,
+        mat.m01, mat.m11, mat.m21, mat.m31,
+        mat.m02, mat.m12, mat.m22, mat.m32,
+        mat.m03, mat.m13, mat.m23, mat.m33,
+        properties = mat.properties
+      )
+    }
+
     def fill(fb: FloatBuffer): FloatBuffer = {
       mat.get(fb)
       fb
@@ -93,6 +110,7 @@ object Mat4f {
     }
 
     def scale(s: Vec3f): Mat4f.Builder = scale(s.x, s.y, s.z)
+    def scale(s: Float): Mat4f.Builder = scale(s, s, s)
     def scale(x: Float, y: Float, z: Float): Mat4f.Builder = {
       mat.scale(x, y, z)
       this

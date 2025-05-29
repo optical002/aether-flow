@@ -24,42 +24,43 @@ object Main {
   val screenHeight = 600
   // 3d box
   val vertices: Array[Float] = Array[Float](
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-    0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f
+    // positions          // normals           // texture coords
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
   )
 
   val cubePositions: Array[Vec3f] = Array[Vec3f](
@@ -74,8 +75,12 @@ object Main {
     Vec3f( 1.5f, 0.2f, -1.5f),
     Vec3f(-1.3f, 1.0f, -1.5f),
   )
-
-
+  val pointLightPositions: Array[Vec3f] = Array[Vec3f](
+    Vec3f( 0.7f,  0.2f,  2.0f),
+    Vec3f( 2.3f, -3.3f, -4.0f),
+    Vec3f(-4.0f,  2.0f, -12.0f),
+    Vec3f( 0.0f,  0.0f, -3.0f)
+  )
 
   def main(args: Array[String]): Unit = {
     if (!glfwInit()) {
@@ -96,7 +101,6 @@ object Main {
     // Triangle start
     val vao = glGenVertexArrays()
     val vbo = glGenBuffers()
-//    val ebo = glGenBuffers()
 
     glBindVertexArray(vao)
 
@@ -105,32 +109,35 @@ object Main {
     vboBuffer.put(vertices).flip()
     glBufferData(GL_ARRAY_BUFFER, vboBuffer, GL_STATIC_DRAW)
 
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
-//    val eboBuffer = BufferUtils.createIntBuffer(indices.length)
-//    eboBuffer.put(indices).flip()
-//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, eboBuffer, GL_STATIC_DRAW)
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * 4, 0)
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * 4, 0)
     glEnableVertexAttribArray(0)
-    glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * 4, 3 * 4)
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * 4, 3 * 4)
     glEnableVertexAttribArray(1)
-
+    glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * 4, 6 * 4)
+    glEnableVertexAttribArray(2)
 
     glBindBuffer(GL_ARRAY_BUFFER, 0)
     glBindVertexArray(0)
 
-    val standardShader = Shader.standard
+    val cubeShader = Shader.create(
+      "shaders/standard.vert",
+      "shaders/standard.frag"
+    )
+    val lightShader = Shader.create(
+      "shaders/standard.vert",
+      "shaders/light.frag"
+    )
+    val lightPosition = Vec3f(1.2f, 1.0f, 2.0f)
     // Triangle end
 
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) // <- wireframe
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL) // <- solid
+    // Light
+    val lightVAO = glGenVertexArrays()
+    glBindVertexArray(lightVAO)
+    glBindBuffer(GL_ARRAY_BUFFER, vbo)
 
-    val texture1Id = Util.loadTexture(Resources.getPath("textures/wall.png"))
-    val texture2Id = Util.loadTexture(Resources.getPath("textures/f_sleep.png"))
-
-    standardShader.use()
-    standardShader.setInt("texture1", 0)
-    standardShader.setInt("texture2", 1)
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * 4, 0)
+    glEnableVertexAttribArray(0)
+    // end Light
 
     glEnable(GL_DEPTH_TEST)
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
@@ -143,6 +150,9 @@ object Main {
     val matBuilderResource = Mat4f.Builder.instances.takeEntry
     val matBuilder = matBuilderResource.resource
 
+    val diffuseMap = Util.loadTexture(Resources.getPath("textures/container2.png"))
+    val specularMap = Util.loadTexture(Resources.getPath("textures/container2_specular.png"))
+
     while (!glfwWindowShouldClose(window)) {
       // input
       processInput(window, camera)
@@ -151,35 +161,77 @@ object Main {
       glClearColor(0.2f, 0.3f, 0.3f, 1.0f)
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-      standardShader.use()
-
-      glActiveTexture(GL_TEXTURE0)
-      glBindTexture(GL_TEXTURE_2D, texture2Id)
-      glActiveTexture(GL_TEXTURE1)
-      glBindTexture(GL_TEXTURE_2D, texture1Id)
-      glBindVertexArray(vao)
-
-      def remap01(value: Float, min: Float, max: Float): Float = {
-        min + (max - min) * value
-      }
       val timeValue = glfwGetTime()
+
+      cubeShader.use()
+      // Setting view Pos
+      cubeShader.setVec3f("viewPos", camera.getPosition)
+
+      // Setting material
+      cubeShader.setVec3f("material.ambient", Vec3f(1.0f, 0.5f, 0.31f))
+      cubeShader.setInt("material.diffuse", 0)
+      glActiveTexture(GL_TEXTURE0)
+      glBindTexture(GL_TEXTURE_2D, diffuseMap)
+      cubeShader.setInt("material.specular", 1)
+      glActiveTexture(GL_TEXTURE1)
+      glBindTexture(GL_TEXTURE_2D, specularMap)
+      cubeShader.setFloat("material.shininess", 32.0f)
+
+      // Dir light
+      cubeShader.setVec3f("dirLight.direction", Vec3f(-0.2f, -1.0f, -0.3f))
+      cubeShader.setVec3f("dirLight.ambient", Vec3f(0.05f))
+      cubeShader.setVec3f("dirLight.diffuse", Vec3f(0.4f))
+      cubeShader.setVec3f("dirLight.specular", Vec3f(0.5f))
+
+      // Point Lights
+      var i = 0
+      for (pointLightPosition <- pointLightPositions) {
+        cubeShader.setVec3f(s"pointLights[$i].position", pointLightPosition)
+
+        cubeShader.setFloat(s"pointLights[$i].constant", 1.0f)
+        cubeShader.setFloat(s"pointLights[$i].linear", 0.7f)
+        cubeShader.setFloat(s"pointLights[$i].quadratic", 1.8f)
+
+        cubeShader.setVec3f(s"pointLights[$i].ambient", Vec3f(0.2f))
+        cubeShader.setVec3f(s"pointLights[$i].diffuse", Vec3f(0.5f))
+        cubeShader.setVec3f(s"pointLights[$i].specular", Vec3f(1.0f))
+        i += 1
+      }
+
+      // Spot Light
+      cubeShader.setVec3f("spotLight.position", camera.getPosition)
+      cubeShader.setVec3f("spotLight.direction", camera.getFront)
+      cubeShader.setFloat("spotLight.cutoff", Math.cos(Math.toRadians(12.5f)))
+      cubeShader.setFloat("spotLight.outerCutoff", Math.cos(Math.toRadians(17.5f)))
+
+      cubeShader.setVec3f("spotLight.ambient", Vec3f(0.2f))
+      cubeShader.setVec3f("spotLight.diffuse", Vec3f(0.5f))
+      cubeShader.setVec3f("spotLight.specular", Vec3f(1.0f))
+
+      cubeShader.setFloat("spotLight.constant", 1.0f)
+      cubeShader.setFloat("spotLight.linear", 0.14f)
+      cubeShader.setFloat("spotLight.quadratic", 0.0007f)
+
+      glBindVertexArray(vao)
 
       val view = matBuilder
         .loadIdentity
         .viewFromCamera(camera)
-      standardShader.setMat4f("view", view)
+        .build
+      cubeShader.setMat4f("view", view)
 
       val projection = matBuilder
         .loadIdentity
         .perspective(
           fov = Math.toRadians(camera.getZoom),
-          aspect = screenWidth / screenHeight,
+          aspect = screenWidth.toFloat / screenHeight,
           near = 0.1f,
           far = 100.0f
         )
-      standardShader.setMat4f("projection", projection)
+        .build
+      cubeShader.setMat4f("projection", projection)
 
-      var i = 0
+      i = 0
       for (cubePosition <- cubePositions) {
         val angle = 20.0f * i
         i += 1
@@ -188,9 +240,22 @@ object Main {
           .translate(cubePosition)
           .rotate(
             Math.toRadians(angle),
-            new Vec3f(0.5f, 1.0f, 0.0f)
+            new Vec3f(0.5f, 1.0f, 0.0f).normalize
           )
-        standardShader.setMat4f("model", model)
+        cubeShader.setMat4f("model", model)
+        glDrawArrays(GL_TRIANGLES, 0, 36)
+      }
+
+      lightShader.use()
+      lightShader.setMat4f("projection", projection)
+      lightShader.setMat4f("view", view)
+      glBindVertexArray(lightVAO)
+      for (pointLight <- pointLightPositions) {
+        val model = matBuilder
+          .loadIdentity
+          .translate(pointLight)
+          .scale(0.2f)
+        lightShader.setMat4f("model", model)
         glDrawArrays(GL_TRIANGLES, 0, 36)
       }
 

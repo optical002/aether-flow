@@ -39,6 +39,16 @@ lazy val commonDependencies = Seq(
   "org.lwjgl" % "lwjgl-stb" % lwjglVersion classifier "natives-linux",
 )
 
+lazy val native = (project in file("native"))
+  .enablePlugins(ScalaNativePlugin)
+  .settings(
+    name := "aether-flow-native",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %%% "cats-effect" % "3.7-4972921"
+    ),
+    Compile / mainClass := Some("aetherflow.engine.NativeMain"),
+  )
+
 lazy val root = (project in file("."))
   .settings(
     name := "aether-flow",

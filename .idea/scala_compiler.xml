@@ -2,6 +2,23 @@
 <project version="4">
   <component name="ScalaCompilerConfiguration">
     <option name="separateProdTestSources" value="true" />
-    <profile name="sbt 1" modules="aether-flow,aether-flow.editor,aether-flow.editor.main,aether-flow.editor.test,aether-flow.engine,aether-flow.engine.main,aether-flow.engine.test,aether-flow.game,aether-flow.game.main,aether-flow.game.test,aether-flow.graphicsCore,aether-flow.graphicsCore.main,aether-flow.graphicsCore.test,aether-flow.graphicsCore~1,aether-flow.graphicsCore~1.main,aether-flow.graphicsCore~1.test,aether-flow.main,aether-flow.openGlGraphics,aether-flow.openGlGraphics.main,aether-flow.openGlGraphics.test,aether-flow.openGlGraphics~1,aether-flow.openGlGraphics~1.main,aether-flow.openGlGraphics~1.test,aether-flow.test" />
+    <profile name="sbt 1" modules="aether-flow,aether-flow.aether-flow-native,aether-flow.editor,aether-flow.editor.main,aether-flow.editor.test,aether-flow.engine,aether-flow.engine.main,aether-flow.engine.test,aether-flow.game,aether-flow.game.main,aether-flow.game.test,aether-flow.graphicsCore,aether-flow.graphicsCore.main,aether-flow.graphicsCore.test,aether-flow.graphicsCore~1,aether-flow.graphicsCore~1.main,aether-flow.graphicsCore~1.test,aether-flow.main,aether-flow.openGlGraphics,aether-flow.openGlGraphics.main,aether-flow.openGlGraphics.test,aether-flow.openGlGraphics~1,aether-flow.openGlGraphics~1.main,aether-flow.openGlGraphics~1.test,aether-flow.test" />
+    <profile name="sbt 2" modules="aether-flow.aether-flow-native.test">
+      <parameters>
+        <parameter value="-P:scalanative:positionRelativizationPaths:/home/optick/work/aether-flow/aether-flow/native/src/main/scala;/home/optick/work/aether-flow/aether-flow/native/src/main/scala-3;/home/optick/work/aether-flow/aether-flow/native/src/main/java;/home/optick/work/aether-flow/aether-flow/native/target/scala-3.7.0/src_managed/main" />
+        <parameter value="-P:scalanative:positionRelativizationPaths:/home/optick/work/aether-flow/aether-flow/native/src/test/scala;/home/optick/work/aether-flow/aether-flow/native/src/test/scala-3;/home/optick/work/aether-flow/aether-flow/native/src/test/java;/home/optick/work/aether-flow/aether-flow/native/target/scala-3.7.0/src_managed/test" />
+      </parameters>
+      <plugins>
+        <plugin path="$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-native/nscplugin_3.7.0/0.5.7/nscplugin_3.7.0-0.5.7.jar" />
+      </plugins>
+    </profile>
+    <profile name="sbt 3" modules="aether-flow.aether-flow-native.main">
+      <parameters>
+        <parameter value="-P:scalanative:positionRelativizationPaths:/home/optick/work/aether-flow/aether-flow/native/src/main/scala;/home/optick/work/aether-flow/aether-flow/native/src/main/scala-3;/home/optick/work/aether-flow/aether-flow/native/src/main/java;/home/optick/work/aether-flow/aether-flow/native/target/scala-3.7.0/src_managed/main" />
+      </parameters>
+      <plugins>
+        <plugin path="$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-native/nscplugin_3.7.0/0.5.7/nscplugin_3.7.0-0.5.7.jar" />
+      </plugins>
+    </profile>
   </component>
 </project>

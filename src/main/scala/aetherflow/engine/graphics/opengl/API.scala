@@ -95,6 +95,18 @@ object API extends GraphicsAPI {
           val kind = r.kind match {
             case uninitialized: Renderer.Uninitialized =>
               val vertices = uninitialized.mesh.vertices
+              
+              // This should have these steps
+              // - Look at all shaderSources, it should be a Set, then initialize them, 
+              // load if new shader sources appear
+              //   | Figure out what is this structure:
+              //      - Vertices which create VAO
+              //      - Vertices have more data in them like texCoords, and there can be more formats.
+              //      - Textures depend on shader settings and.
+              // - Have this structure initialize same way as shaders.
+              // - Make renderer reuse this structure, for the same stuff.
+              
+              
               // TODO Problem recreates shader every time
               // TODO Problem rebinds everything, for same model, this should be per model not per renderer
               // TODO Problem this still is not abstract it's very specific to the box with standard shader

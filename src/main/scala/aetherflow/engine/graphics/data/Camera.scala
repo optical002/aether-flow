@@ -15,6 +15,8 @@ class Camera private(
   private var zoom: Float = 45.0f,
 ) {
   def getZoom: Float = zoom
+  def getPosition: Vec3f = position
+  def getFront: Vec3f = front
 
   def updateViewMatrix(mat: Mat4f.Builder): Mat4f.Builder =
     mat.lookAt(position, position ++ front, up)

@@ -7,6 +7,7 @@ case class Vec3f(x: Float, y: Float, z: Float) {
   def --(v: Vec3f): Vec3f = Vec3f(x - v.x, y - v.y, z - v.z)
 
   def *(scalar: Float): Vec3f = Vec3f(x * scalar, y * scalar, z * scalar)
+  def *(v: Vec3f): Vec3f = Vec3f(x * v.x, y * v.y, z * v.z)
 
   lazy val normalize: Vec3f = Vec3f.normalize(this)
 
@@ -22,6 +23,8 @@ object Vec3f {
   val left = Vec3f(-1.0f, 0.0f, 0.0f)
   val forward = Vec3f(0.0f, 0.0f, 1.0f)
   val back = Vec3f(0.0f, 0.0f, -1.0f)
+  
+  def apply(uni: Float): Vec3f = Vec3f(uni, uni, uni)
   
   def cross(v1: Vec3f, v2: Vec3f): Vec3f = {
     val x = Math.fma(v1.y, v2.z, -v1.z * v2.y)

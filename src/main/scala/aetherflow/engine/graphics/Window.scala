@@ -1,32 +1,14 @@
 package aetherflow.engine.graphics
 
+import aetherflow.engine.*
 import aetherflow.engine.core.FrameCoordinator
 import aetherflow.engine.core.FrameCoordinator.SignalFrom
 import aetherflow.engine.core.logger.ASyncLogger
+import aetherflow.engine.ecs.EcsStateMachine
 import aetherflow.engine.graphics.config.WindowConfig
 import aetherflow.engine.performance.API
 import aetherflow.engine.performance.Metrics.*
-import aetherflow.engine.*
-import aetherflow.engine.components.*
-import aetherflow.engine.components.Renderer.Initialized
-import aetherflow.engine.ecs.{Component, EcsStateMachine}
-import aetherflow.engine.graphics.data.{Camera, Mat4f, Mesh, Shader, ShaderSource, Vec3f}
-import aetherflow.engine.utils.Resources
 import zio.*
-import zio.stm.*
-import org.joml.*
-import org.lwjgl.*
-import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.opengl.GL
-import org.lwjgl.opengl.GL.*
-import org.lwjgl.opengl.GL11.*
-import org.lwjgl.opengl.GL12.*
-import org.lwjgl.opengl.GL13.*
-import org.lwjgl.opengl.GL14.*
-import org.lwjgl.opengl.GL15.*
-import org.lwjgl.opengl.GL20.*
-import org.lwjgl.opengl.GL30.*
-import org.lwjgl.system.MemoryUtil.*
 
 import java.util.concurrent.Executors
 

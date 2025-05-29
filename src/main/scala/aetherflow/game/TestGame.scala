@@ -40,11 +40,24 @@ object TestGame extends App {
 
 object StartUpSystem extends ecs.System {
   override def run(ecsStateMachine: EcsStateMachine, logger: ASyncLogger): Task[Unit] = {
-    ecsStateMachine.createEntity(
-      Transform(Vec3f.zero, Vec3f.zero, Vec3f.one),
-      Renderer.uninitialized(Mesh.box, Shader.standardSource)
-    ) *>
-    logger.logDebug("Created entity")
+    def createBox(
+      position: Vec3f = Vec3f.zero,
+      rotation: Vec3f = Vec3f.zero,
+      scale: Vec3f = Vec3f.one
+    ): UIO[Unit] = {
+      ecsStateMachine.createEntity(
+        Transform(position, Vec3f.zero, Vec3f.one),
+        Renderer.uninitialized(Mesh.box, Shader.standardSource)
+      ).unit
+    }
+
+    createBox() *>
+    createBox(position = Vec3f(2, 3, 1)) *>
+    createBox(position = Vec3f(-2, 3, 1)) *>
+    createBox(position = Vec3f(0, -3, 1)) *>
+    createBox(position = Vec3f(2, -3, 1)) *>
+    createBox(position = Vec3f(-2, -3, 1)) *>
+    createBox(position = Vec3f(0, 0, 1))
   }
 }
 object MovementSystem extends ecs.System {
@@ -52,7 +65,7 @@ object MovementSystem extends ecs.System {
     result <- ecsStateMachine.query1[Transform]
     _ <- ZIO.foreach(result) { case (_, transformRef) =>
       for {
-        _ <- transformRef.update(_.applyVelocity(Vec3f.one * 0.001f)).commit
+        _ <- transformRef.update(_.applyVelocity(Vec3f.one * 0.005f)).commit
       } yield ()
     }
   } yield ()
