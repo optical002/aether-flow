@@ -1,7 +1,7 @@
 package aetherflow.renderEngine
 
-import aetherflow.engine.graphics.Util
-import aetherflow.engine.graphics.data.{Camera, Mat4f, Shader, Vec3f}
+import aetherflow.engine.graphics.Utils
+import aetherflow.engine.graphics.data.{Camera, Mat4f, Model, Shader, Vec3f}
 import aetherflow.engine.utils.Resources
 import org.joml.*
 import org.lwjgl.*
@@ -18,10 +18,11 @@ import org.lwjgl.opengl.GL20.*
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil.*
+import org.lwjgl.assimp.*
 
 object Main {
-  val screenWidth = 800
-  val screenHeight = 600
+  val screenWidth = 1980
+  val screenHeight = 1080
   // 3d box
   val vertices: Array[Float] = Array[Float](
     // positions          // normals           // texture coords
@@ -64,7 +65,6 @@ object Main {
   )
 
   val cubePositions: Array[Vec3f] = Array[Vec3f](
-    Vec3f( 0.0f, 0.0f, 0.0f),
     Vec3f( 2.0f, 5.0f, -15.0f),
     Vec3f(-1.5f, -2.2f, -2.5f),
     Vec3f(-3.8f, -2.0f, -12.3f),
@@ -150,8 +150,13 @@ object Main {
     val matBuilderResource = Mat4f.Builder.instances.takeEntry
     val matBuilder = matBuilderResource.resource
 
-    val diffuseMap = Util.loadTexture(Resources.getPath("textures/container2.png"))
-    val specularMap = Util.loadTexture(Resources.getPath("textures/container2_specular.png"))
+    val diffuseMap = Utils.loadTexture(Resources.getPath("textures/container2.png"))
+    val specularMap = Utils.loadTexture(Resources.getPath("textures/container2_specular.png"))
+    
+    val ourModel = Model.importModel_v2(Resources.getPath("models/boxModel1/Crate/Crate1.obj"))
+//    val ourModel = Model.importModel_v2(Resources.getPath("models/boxModel2/box.fbx"))
+//    val ourModel = Model.importModel_v2(Resources.getPath("models/katana/katana.obj"))
+    val ourModel2 = Model.importModel_v2(Resources.getPath("models/katana2/KatanaForZIP.obj"))
 
     while (!glfwWindowShouldClose(window)) {
       // input
@@ -169,13 +174,16 @@ object Main {
 
       // Setting material
       cubeShader.setVec3f("material.ambient", Vec3f(1.0f, 0.5f, 0.31f))
-      cubeShader.setInt("material.diffuse", 0)
+      cubeShader.setInt("texture_diffuse", 0)
       glActiveTexture(GL_TEXTURE0)
       glBindTexture(GL_TEXTURE_2D, diffuseMap)
-      cubeShader.setInt("material.specular", 1)
+      cubeShader.setInt("texture_specular", 1)
       glActiveTexture(GL_TEXTURE1)
       glBindTexture(GL_TEXTURE_2D, specularMap)
       cubeShader.setFloat("material.shininess", 32.0f)
+      cubeShader.setUniform3f("material.ambientColor", 1, 1, 1)
+      cubeShader.setUniform3f("material.diffuseColor", 1, 1, 1)
+      cubeShader.setUniform3f("material.specularColor", 1, 1, 1)
 
       // Dir light
       cubeShader.setVec3f("dirLight.direction", Vec3f(-0.2f, -1.0f, -0.3f))
@@ -235,16 +243,27 @@ object Main {
       for (cubePosition <- cubePositions) {
         val angle = 20.0f * i
         i += 1
-        val model = matBuilder
+        cubeShader.setMat4f("model", matBuilder
           .loadIdentity
           .translate(cubePosition)
           .rotate(
             Math.toRadians(angle),
             new Vec3f(0.5f, 1.0f, 0.0f).normalize
           )
-        cubeShader.setMat4f("model", model)
+        )
         glDrawArrays(GL_TRIANGLES, 0, 36)
       }
+      cubeShader.setMat4f("model", matBuilder
+        .loadIdentity
+        .translate(Vec3f(0.0f, 0.0f, -10.0f))
+//        .scale(0.025f)
+      )
+      ourModel.draw(cubeShader)
+      cubeShader.setMat4f("model", matBuilder
+        .loadIdentity
+        .translate(Vec3f(0.0f, 5.0f, -10.0f))
+      )
+      ourModel2.draw(cubeShader)
 
       lightShader.use()
       lightShader.setMat4f("projection", projection)

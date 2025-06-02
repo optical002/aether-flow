@@ -129,8 +129,8 @@ object API extends GraphicsAPI {
               glBindBuffer(GL_ARRAY_BUFFER, 0)
               glBindVertexArray(0)
 
-              val texture1Id = Util.loadTexture(Resources.getPath("textures/wall.png"))
-              val texture2Id = Util.loadTexture(Resources.getPath("textures/f_sleep.png"))
+              val texture1Id = Utils.loadTexture(Resources.getPath("textures/wall.png"))
+              val texture2Id = Utils.loadTexture(Resources.getPath("textures/f_sleep.png"))
 
               shader.use()
               shader.setInt("texture1", 0)

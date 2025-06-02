@@ -1,7 +1,7 @@
 package aetherflow.engine.components
 
 import aetherflow.engine.ecs.Component
-import aetherflow.engine.graphics.Util
+import aetherflow.engine.graphics.Utils
 import aetherflow.engine.graphics.data.*
 import aetherflow.engine.utils.Resources
 import org.joml.*
@@ -22,11 +22,11 @@ case class Renderer(kind: Renderer.Kind) extends Component
 
 object Renderer {
   def uninitialized(
-    mesh: Mesh, shaderSource: ShaderSource
+    mesh: MeshLegacy, shaderSource: ShaderSource
   ): Renderer = Renderer(Uninitialized(mesh, shaderSource))
 
   sealed trait Kind
-  case class Uninitialized(mesh: Mesh, shaderSource: ShaderSource) extends Kind
+  case class Uninitialized(mesh: MeshLegacy, shaderSource: ShaderSource) extends Kind
   case class Initialized(vao: Int, shader: Shader, texture1: Int, texture2: Int) extends Kind
 }
 

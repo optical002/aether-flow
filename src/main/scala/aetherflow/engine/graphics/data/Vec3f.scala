@@ -15,6 +15,8 @@ case class Vec3f(x: Float, y: Float, z: Float) {
   def dot(v: Vec3f): Float = Vec3f.dot(this, v)
 }
 object Vec3f {
+  lazy val sizeOf = 3 * 4
+  
   val zero = Vec3f(0.0f, 0.0f, 0.0f)
   val one = Vec3f(1.0f, 1.0f, 1.0f)
   val up = Vec3f(0.0f, 1.0f, 0.0f)
@@ -25,6 +27,7 @@ object Vec3f {
   val back = Vec3f(0.0f, 0.0f, -1.0f)
   
   def apply(uni: Float): Vec3f = Vec3f(uni, uni, uni)
+  def apply(vec2f: Vec2f, z: Float): Vec3f = Vec3f(vec2f.x, vec2f.y, z)
   
   def cross(v1: Vec3f, v2: Vec3f): Vec3f = {
     val x = Math.fma(v1.y, v2.z, -v1.z * v2.y)

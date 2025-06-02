@@ -6,7 +6,7 @@ import aetherflow.engine.core.logger.{ASyncLogger, LogFilter}
 import aetherflow.engine.ecs.{Component, EcsStateMachine, WorldBuilder}
 import aetherflow.engine.graphics.config.WindowConfig
 import aetherflow.engine.graphics.*
-import aetherflow.engine.graphics.data.{Mesh, Shader, Vec3f}
+import aetherflow.engine.graphics.data.{MeshLegacy, Shader, Vec3f}
 import aetherflow.engine.graphics.*
 import zio.*
 
@@ -47,7 +47,7 @@ object StartUpSystem extends ecs.System {
     ): UIO[Unit] = {
       ecsStateMachine.createEntity(
         Transform(position, Vec3f.zero, Vec3f.one),
-        Renderer.uninitialized(Mesh.box, Shader.standardSource)
+        Renderer.uninitialized(MeshLegacy.box, Shader.standardSource)
       ).unit
     }
 

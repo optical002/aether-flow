@@ -16,7 +16,7 @@ import org.lwjgl.stb.STBImage.*
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil.*
 
-object Util {
+object Utils {
   def loadTexture(path: String): Int = {
     val stack = MemoryStack.stackPush()
     val width = stack.mallocInt(1)
@@ -26,7 +26,7 @@ object Util {
     stbi_set_flip_vertically_on_load(true)
     val image = stbi_load(path, width, height, channels, 4) // Force RGBA
     if (image == null) {
-      throw new RuntimeException(s"Failed to load image: ${stbi_failure_reason()}")
+      throw new RuntimeException(s"Failed to load image at path ($path): ${stbi_failure_reason()}")
     }
 
     val textureId = glGenTextures()
@@ -49,6 +49,8 @@ object Util {
     glBindTexture(GL_TEXTURE_2D, 0)
     stbi_image_free(image)
     stack.close()
+
+    println(s"Loaded texture($path): $textureId")
     textureId
   }
 }

@@ -31,6 +31,14 @@ class Shader private(val programId: Int) {
     glUniform3f(glGetUniformLocation(programId, name), value.x, value.y, value.z)
   }
 
+  def setUniform3f(name: String, f1: Float, f2: Float, f3: Float): Unit = {
+    glUniform3f(glGetUniformLocation(programId, name), f1, f2, f3)
+  }
+
+  def setUniform4f(name: String, f1: Float, f2: Float, f3: Float, f4: Float): Unit = {
+    glUniform4f(glGetUniformLocation(programId, name), f1, f2, f3, f4)
+  }
+
   def setMat4f(name: String, value: Mat4f.Builder): Unit = {
     val stack = MemoryStack.stackPush()
     val fb = stack.mallocFloat(16)
