@@ -1,7 +1,15 @@
 package aetherflow.engine
 
-import cats.effect.*
+import kyo.*
 
-object NativeMain extends IOApp.Simple {
-  def run = IO.println("Hello Cats Effect!")
+object NativeMain extends KyoApp {
+  run {
+    for {
+      _ <- Console.printLine(s"[${Thread.currentThread().getName}] Hello scala native from kyo")
+      _ <- Async.sleep(1.second)
+      _ <- Console.printLine(s"[${Thread.currentThread().getName}] Hello scala native from kyo")
+      _ <- Async.sleep(1.second)
+      _ <- Console.printLine(s"[${Thread.currentThread().getName}] Hello scala native from kyo")
+    } yield ()
+  }
 }

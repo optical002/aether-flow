@@ -8,7 +8,7 @@ import org.lwjgl.assimp.Assimp.*
 import scala.collection.*
 
 
-object StaticMeshLoader {
+object StaticMeshLoader { 
   /**
    * @param resourcePath The path to the file where the model file is located. This is an absolute path,
    *                     because Assimp may need to load additional files and may use the same base path as
@@ -76,6 +76,7 @@ object StaticMeshLoader {
     val mutableNormals = mutable.Buffer[Float]()
     val mutableTextures = mutable.Buffer[Texture]()
 
+    //noinspection NotImplementedCode
     ???
   }
 }

@@ -1,3 +1,5 @@
+import scala.scalanative.build.*
+
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / scalaVersion := "3.7.0"
 
@@ -42,13 +44,24 @@ lazy val commonDependencies = Seq(
   "org.lwjgl" % "lwjgl-assimp" % lwjglVersion classifier "natives-linux",
 )
 
+val kyoVersion = "1.0-RC1"
+
 lazy val native = (project in file("native"))
   .enablePlugins(ScalaNativePlugin)
   .settings(
     name := "aether-flow-native",
     libraryDependencies ++= Seq(
-      "org.typelevel" %%% "cats-effect" % "3.7-4972921"
+      "io.getkyo" %%% "kyo-core" % kyoVersion,
+//      "io.getkyo" %% "kyo-scheduler" % kyoVersion,
+//      "io.getkyo" %% "kyo-data" % kyoVersion,
+//      "io.getkyo" %% "kyo-prelude" % kyoVersion,
     ),
+    nativeConfig ~= { c =>
+      c
+        .withMode(Mode.debug)
+        .withGC(GC.commix)
+        .withBuildTarget(BuildTarget.application)
+    },
     Compile / mainClass := Some("aetherflow.engine.NativeMain"),
   )
 
