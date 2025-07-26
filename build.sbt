@@ -52,9 +52,9 @@ lazy val native = (project in file("native"))
     name := "aether-flow-native",
     libraryDependencies ++= Seq(
       "io.getkyo" %%% "kyo-core" % kyoVersion,
-//      "io.getkyo" %% "kyo-scheduler" % kyoVersion,
-//      "io.getkyo" %% "kyo-data" % kyoVersion,
-//      "io.getkyo" %% "kyo-prelude" % kyoVersion,
+      "io.getkyo" %% "kyo-scheduler" % kyoVersion,
+      "io.getkyo" %% "kyo-data" % kyoVersion,
+      "io.getkyo" %% "kyo-prelude" % kyoVersion,
     ),
     nativeConfig ~= { c =>
       c
