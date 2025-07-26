@@ -10,6 +10,7 @@ object GLFW {
 
   type GLFWKeyFun = CFuncPtr5[Ptr[GLFWWindow], CInt, CInt, CInt, CInt, Unit]
   type GLFWErrorFun = CFuncPtr2[CInt, CString, Unit]
+  type GLFWglProc = CFuncPtr0[Unit]
 
   def glfwInit(): CBool = extern
   def glfwCreateWindow(
@@ -37,4 +38,5 @@ object GLFW {
   def glfwPollEvents(): Unit = extern
   def glfwSetErrorCallback(callback: GLFWErrorFun): GLFWErrorFun = extern
   def glfwTerminate(): Unit = extern
+  def glfwGetProcAddress(procname: CString): GLFWglProc = extern
 }

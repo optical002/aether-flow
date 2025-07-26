@@ -9,7 +9,7 @@
         <parameter value="-P:scalanative:positionRelativizationPaths:/home/optick/work/aether-flow/aether-flow/native/src/test/scala;/home/optick/work/aether-flow/aether-flow/native/src/test/scala-3;/home/optick/work/aether-flow/aether-flow/native/src/test/java;/home/optick/work/aether-flow/aether-flow/native/target/scala-3.7.0/src_managed/test" />
       </parameters>
       <plugins>
-        <plugin path="$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-native/nscplugin_3.7.0/0.5.7/nscplugin_3.7.0-0.5.7.jar" />
+        <plugin path="$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-native/nscplugin_3.7.0/0.5.8/nscplugin_3.7.0-0.5.8.jar" />
       </plugins>
     </profile>
     <profile name="sbt 3" modules="aether-flow.aether-flow-native.main">
@@ -17,7 +17,7 @@
         <parameter value="-P:scalanative:positionRelativizationPaths:/home/optick/work/aether-flow/aether-flow/native/src/main/scala;/home/optick/work/aether-flow/aether-flow/native/src/main/scala-3;/home/optick/work/aether-flow/aether-flow/native/src/main/java;/home/optick/work/aether-flow/aether-flow/native/target/scala-3.7.0/src_managed/main" />
       </parameters>
       <plugins>
-        <plugin path="$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-native/nscplugin_3.7.0/0.5.7/nscplugin_3.7.0-0.5.7.jar" />
+        <plugin path="$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-native/nscplugin_3.7.0/0.5.8/nscplugin_3.7.0-0.5.8.jar" />
       </plugins>
     </profile>
   </component>
