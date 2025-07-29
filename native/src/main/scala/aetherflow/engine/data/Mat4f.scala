@@ -37,14 +37,12 @@ object Mat4f {
     private var m02: Float, private var m12: Float, private var m22: Float, private var m32: Float,
     private var m03: Float, private var m13: Float, private var m23: Float, private var m33: Float,
   ) {
-    def build: Mat4f = {
-      Mat4f(
-        m00 = m00, m10 = m10, m20 = m20, m30 = m30,
-        m01 = m01, m11 = m11, m21 = m21, m31 = m31,
-        m02 = m02, m12 = m12, m22 = m22, m32 = m32,
-        m03 = m03, m13 = m13, m23 = m23, m33 = m33,
-      )
-    }
+    def build: Mat4f = Mat4f(
+      m00 = m00, m10 = m10, m20 = m20, m30 = m30,
+      m01 = m01, m11 = m11, m21 = m21, m31 = m31,
+      m02 = m02, m12 = m12, m22 = m22, m32 = m32,
+      m03 = m03, m13 = m13, m23 = m23, m33 = m33,
+    )
 
     def loadIdentity: Builder = load(identity)
     def load(m: Mat4f): Builder = {

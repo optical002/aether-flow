@@ -24,6 +24,9 @@ object Vec3f {
   val left = Vec3f(-1.0f, 0.0f, 0.0f)
   val forward = Vec3f(0.0f, 0.0f, 1.0f)
   val back = Vec3f(0.0f, 0.0f, -1.0f)
+  val axisX = Vec3f(1, 0, 0)
+  val axisY = Vec3f(0, 1, 0)
+  val axisZ = Vec3f(0, 0, 1)
   
   def apply(uni: Float): Vec3f = Vec3f(uni, uni, uni)
   def apply(vec2f: Vec2f, z: Float): Vec3f = Vec3f(vec2f.x, vec2f.y, z)
