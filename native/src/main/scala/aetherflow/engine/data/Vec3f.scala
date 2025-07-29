@@ -1,5 +1,6 @@
-package aetherflow.engine.graphics.data
+package aetherflow.engine.data
 
+// Note operations on vector allocate
 case class Vec3f(x: Float, y: Float, z: Float) {
   def ++(v: Vec3f): Vec3f = Vec3f(x + v.x, y + v.y, z + v.z)
   def --(v: Vec3f): Vec3f = Vec3f(x - v.x, y - v.y, z - v.z)

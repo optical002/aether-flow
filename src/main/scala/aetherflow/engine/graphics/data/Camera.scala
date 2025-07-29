@@ -1,7 +1,6 @@
 package aetherflow.engine.graphics.data
 
 import aetherflow.engine.graphics.data.{Mat4f, Vec3f}
-import org.joml.Math.*
 import org.lwjgl.glfw.GLFW.*
 
 class Camera private(
@@ -39,9 +38,9 @@ class Camera private(
 
   private def updateCameraVectors(): Unit = {
     def cameraLook(yaw: Float, pitch: Float): Vec3f = Vec3f(
-      x = cos(toRadians(yaw)) * cos(toRadians(pitch)),
-      y = sin(toRadians(pitch)),
-      z = sin(toRadians(yaw)) * cos(toRadians(pitch)),
+      x = (Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch))).toFloat,
+      y = Math.sin(Math.toRadians(pitch)).toFloat,
+      z = (Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch))).toFloat,
     )
 
     front = cameraLook(yaw, pitch).normalize

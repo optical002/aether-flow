@@ -70,7 +70,8 @@ object NativeMain {
       glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3)
       glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3)
       glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
-      val window = glfwCreateWindow(640, 320, "Hello World".asCString, null, null)
+      glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
+      val window = glfwCreateWindow(1280, 1080, "Hello World".asCString, null, null)
       if (window == null) {
         println("Failed to create a GLFW window, exiting...")
         sys.exit()
