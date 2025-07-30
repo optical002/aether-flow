@@ -1,4 +1,4 @@
-package aetherflow.engine.data
+package aetherflow.engine.graphics.data
 
 case class Vec2f(x: Float, y: Float) {
   def ++(v: Vec2f): Vec2f = Vec2f(x + v.x, y + v.y)

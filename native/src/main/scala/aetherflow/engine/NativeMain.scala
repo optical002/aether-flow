@@ -3,10 +3,10 @@ package aetherflow.engine
 import kyo.*
 import aetherflow.engine.nativelink.gl.GL.*
 import aetherflow.engine.nativelink.gl.GLExtras.*
-import aetherflow.engine.nativelink.gl.gl.*
+import aetherflow.engine.nativelink.gl.glad.*
 import aetherflow.engine.nativelink.gl.GLFW.*
 import aetherflow.engine.nativelink.gl.GLFWExtras.*
-import aetherflow.engine.data.*
+import aetherflow.engine.graphics.data.{Shader, Vec2f, Vec3f}
 import aetherflow.engine.syntax.*
 
 import scalanative.unsafe.*
@@ -20,23 +20,6 @@ object NativeMain {
      0.5f, -0.5f, 0.0f,
      0.0f, 0.5f, 0.0f
   )
-
-  def vertexShaderText(using Zone) =
-    """
-      |#version 330 core
-      |layout (location = 0) in vec3 aPos;
-      |void main() {
-      |  gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);
-      |}
-      |""".stripMargin.asCString
-  def fragmentShaderText(using Zone) =
-    """
-      |#version 330
-      |out vec4 FragColor;
-      |void main() {
-      |  FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-      |}
-      |""".stripMargin.asCString
 
   def keyCallback(window: Ptr[GLFWWindow], key: CInt, scancode: CInt, action: CInt, mods: CInt): Unit = {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -75,36 +58,6 @@ object NativeMain {
       glfwMakeContextCurrent(window)
       gladLoadGL(glfwGetProcAddress)
       glfwSwapInterval(1)
-      
-
-      println("Creating vertex shader")
-      val vertexShader = glCreateShader(GL_VERTEX_SHADER)
-      val vertexShaderTextPtr = stackalloc[CString]()
-      vertexShaderTextPtr.update(0, vertexShaderText)
-      glShaderSource(vertexShader, 1.toUInt, vertexShaderTextPtr, null)
-      glCompileShader(vertexShader)
-      val status = stackalloc[GLint]()
-      glGetShaderiv(vertexShader, GL_COMPILE_STATUS, status)
-      println(s"status of vertex shader ${!status}")
-
-      println("Creating fragment shader")
-      val fragmentShader = glCreateShader(GL_FRAGMENT_SHADER)
-      val fragmentShaderTextPtr = stackalloc[CString]()
-      fragmentShaderTextPtr.update(0, fragmentShaderText)
-      glShaderSource(fragmentShader, 1.toUInt, fragmentShaderTextPtr, null)
-      glCompileShader(fragmentShader)
-      glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, status)
-      println(s"status of vertex shader ${!status}")
-
-      println("LinkingShaders")
-      val program = glCreateProgram()
-      glAttachShader(program, vertexShader)
-      glAttachShader(program, fragmentShader)
-      glLinkProgram(program)
-      glGetProgramiv(program, GL_COMPILE_STATUS, status)
-      println(s"status of shader program ${!status}")
-
-      glUseProgram(program)
 
       println("Binding vertex array")
       val VAO = stackalloc[GLuint]()
@@ -112,15 +65,12 @@ object NativeMain {
       glBindVertexArray(!VAO)
 
       println("Creating vertex buffer")
-      val VBO = stackalloc[GLuint]();
+      val VBO = stackalloc[GLuint]()
       glGenBuffers(1.toUInt, VBO)
       glBindBuffer(GL_ARRAY_BUFFER, !VBO)
 
       val verticesPtr = stackalloc[GLfloat](vertices.length)
-      for (i <- vertices.indices) {
-        verticesPtr.update(i, vertices(i))
-        println(s"$i = ${verticesPtr(i)}")
-      }
+      for (i <- vertices.indices) verticesPtr(i) = vertices(i)
       glBufferData(GL_ARRAY_BUFFER, vertices.length * 4, verticesPtr.asInstanceOf[Ptr[Byte]], GL_STATIC_DRAW)
 
       println("Binding VertexArray")
@@ -130,15 +80,14 @@ object NativeMain {
         pointer = 0L.toPtr[Byte]
       )
       glEnableVertexAttribArray(0.toUInt)
-      
+
       println("Entering rendering loop...")
       while (glfwWindowShouldClose(window) == 0) {
-//        println("Rendering frame...")
         val (width, height) = glfwGetFramebufferSize_(window)
         glViewport(0, 0, width = width.toUInt, height = height.toUInt)
         glClear(GL_COLOR_BUFFER_BIT)
 
-        glUseProgram(program)
+        Shader.standard.use()
         glBindVertexArray(!VAO)
         glDrawArrays(GL_TRIANGLES, 0, 3.toUInt)
 
@@ -152,4 +101,14 @@ object NativeMain {
       println("Successfully closed window")
     }
   }
+
+  // Architecture:
+  // Shader <- contains shader program
+  // SpriteRenderer(Shader) <- contians instructions for drawing sprite
+  // |--> drawSprite(Texture2D, Position, Size, Rotate, Color)
+  // Particle(Position, Velocity, Color, Life)
+  // ResourceManager
+  // PostProcessor
+  // SoundEngine
+  // TextRenderer
 }

@@ -1,4 +1,4 @@
-package aetherflow.engine.data
+package aetherflow.engine.graphics.data
 
 import aetherflow.engine.nativelink.gl.GL.*
 import aetherflow.engine.nativelink.gl.GLExtras.*

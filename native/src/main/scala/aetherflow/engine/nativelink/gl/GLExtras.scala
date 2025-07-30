@@ -5,6 +5,43 @@ import scalanative.unsigned.*
 
 object GLExtras {
   import GL.*
+
+  /** @return True = success */
+  //noinspection SpellCheckingInspection
+  def glGetShaderi(shader: GLuint, pname: GLenum): Boolean = {
+    val status = stackalloc[GLint]()
+    glGetShaderiv(shader, pname, status)
+    !status == GL_TRUE
+  }
+
+  /** @return True = success */
+  //noinspection SpellCheckingInspection
+  def glGetProgrami(program: GLuint, pname: GLenum): Boolean = {
+    val status = stackalloc[GLint]()
+    glGetProgramiv(program, pname, status)
+    !status == GL_TRUE
+  }
+
+  def glGetShaderInfoLog_(shader: GLuint): String =  {
+    val bufSize: GLsizei = 512.toUInt
+    val infoLog = stackalloc[GLchar](bufSize)
+    glGetShaderInfoLog(shader, bufSize, null, infoLog)
+    fromCString(infoLog)
+  }
+
+  def glGetProgramInfoLog_(program: GLuint): String = {
+    val bufSize: GLsizei = 512.toUInt
+    val infoLog = stackalloc[GLchar](bufSize)
+    glGetProgramInfoLog(program, bufSize, null, infoLog)
+    fromCString(infoLog)
+  }
+
+  def glShaderSource_(shader: GLuint, string: CString): Unit = {
+    val stringPtr = stackalloc[CString]()
+    stringPtr.update(0, string)
+    glShaderSource(shader, 1.toUInt, stringPtr, null)
+  }
+
   /*
    * Constants
    */

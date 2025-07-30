@@ -1,4 +1,6 @@
-package aetherflow.engine.data
+package aetherflow.engine.graphics.data
+
+import aetherflow.engine.graphics.GMath
 
 // Note operations on vector allocate
 case class Vec3f(x: Float, y: Float, z: Float) {
@@ -32,16 +34,16 @@ object Vec3f {
   def apply(vec2f: Vec2f, z: Float): Vec3f = Vec3f(vec2f.x, vec2f.y, z)
   
   def cross(v1: Vec3f, v2: Vec3f): Vec3f = {
-    val x = GraphicsMath.fma(v1.y, v2.z, -v1.z * v2.y)
-    val y = GraphicsMath.fma(v1.z, v2.x, -v1.x * v2.z)
-    val z = GraphicsMath.fma(v1.x, v2.y, -v1.y * v2.x)
+    val x = GMath.fma(v1.y, v2.z, -v1.z * v2.y)
+    val y = GMath.fma(v1.z, v2.x, -v1.x * v2.z)
+    val z = GMath.fma(v1.x, v2.y, -v1.y * v2.x)
     Vec3f(x, y, z)
   }
   
   def dot(v1: Vec3f, v2: Vec3f): Float = 
-    GraphicsMath.fma(v1.x, v2.x, GraphicsMath.fma(v1.y, v2.y, v1.z * v2.z))
+    GMath.fma(v1.x, v2.x, GMath.fma(v1.y, v2.y, v1.z * v2.z))
   
   def normalize(v: Vec3f): Vec3f = 
-    v * GraphicsMath.invsqrt(GraphicsMath.fma(v.x, v.x, GraphicsMath.fma(v.y, v.y, v.z * v.z)))
+    v * GMath.invsqrt(GMath.fma(v.x, v.x, GMath.fma(v.y, v.y, v.z * v.z)))
 }
   
