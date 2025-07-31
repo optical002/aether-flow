@@ -62,6 +62,8 @@ lazy val native = (project in file("native"))
         .withGC(GC.commix)
         .withBuildTarget(BuildTarget.application)
     },
+    // Look into this how to copy the resource folder.
+//    Compile / resourceGenerators += (Compile / resourceDirectory).value,
     Compile / mainClass := Some("aetherflow.engine.NativeMain"),
   )
 
